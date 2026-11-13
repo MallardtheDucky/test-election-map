@@ -2,9 +2,10 @@
   position: relative;
   z-index: 1000;
   flex-shrink: 0;
-  padding: 10px 22px 12px;
-  background: linear-gradient(180deg, #111a33 0%, #0b1224 100%);
-  border-bottom: 1px solid var(--line);
+  padding: 10px 24px 12px;
+  background: var(--page);
+  color: var(--page-text);
+  border-bottom: 1px solid var(--page-line);
 }
 
 .top-row {
@@ -12,37 +13,40 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .title-group {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px 12px;
+  gap: 6px 12px;
   min-width: 0;
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 20px;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   line-height: 1;
+  text-transform: uppercase;
+  color: #1b2a41;
 }
 
 .live-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 9px 4px 8px;
-  background: #e5384a;
-  border-radius: 999px;
+  padding: 3px 9px 3px 8px;
+  background: #d6123a;
+  color: white;
+  border-radius: 3px;
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -64,28 +68,24 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 4px 10px;
-  background: rgba(173, 190, 230, 0.07);
-  border: 1px solid var(--line);
-  border-radius: 999px;
   font-size: 12px;
-  color: var(--text-muted);
+  color: #667085;
 }
 
 .sync-dot {
   width: 7px;
   height: 7px;
-  background: var(--text-muted);
+  background: #98a2b3;
   border-radius: 50%;
 }
 
 .sync[data-state='live'] .sync-dot {
-  background: var(--good);
-  box-shadow: 0 0 0 3px rgba(62, 207, 142, 0.2);
+  background: #1fa971;
+  box-shadow: 0 0 0 3px rgba(31, 169, 113, 0.2);
 }
 
 .sync[data-state='error'] .sync-dot {
-  background: var(--gold);
+  background: #e2b64a;
 }
 
 .header-controls {
@@ -95,9 +95,9 @@
 
 .scoreboard {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 1.5fr) minmax(0, 1fr);
+  grid-template-columns: auto minmax(220px, 1fr) auto;
   align-items: center;
-  gap: 22px;
+  gap: 26px;
 }
 
 .cand {
@@ -108,86 +108,84 @@
 }
 
 .cand-gop {
-  justify-content: flex-start;
-}
-
-.cand-dem {
   justify-content: flex-end;
   text-align: right;
 }
 
-.cand-text {
+.cand-body {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
 .cand-name {
-  overflow: hidden;
-  font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: 700;
-  line-height: 1.05;
-  text-overflow: ellipsis;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
-.cand-pv {
-  margin-top: 2px;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
+.cand-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.cand-gop .cand-row {
+  justify-content: flex-end;
 }
 
 .cand-ev {
-  font-family: var(--font-display);
-  font-size: 54px;
-  font-weight: 800;
-  line-height: 1;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 0.95;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.cand-stats {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 3px;
+  font-size: 12px;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
 
-.cand-gop .cand-ev {
-  order: 3;
-  margin-left: auto;
-  color: #ff6b76;
+.cand-dem .cand-name,
+.cand-dem .cand-ev,
+.cand-dem .cand-stats {
+  color: #1f4c96;
 }
 
-.cand-dem .cand-ev {
-  margin-right: auto;
-  color: #6fa8f0;
+.cand-gop .cand-name,
+.cand-gop .cand-ev,
+.cand-gop .cand-stats {
+  color: #d4101f;
 }
 
 .meter {
   display: flex;
   flex-direction: column;
   gap: 5px;
-}
-
-.meter-labels,
-.meter-foot {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--text-muted);
+  padding-top: 4px;
 }
 
 .meter-goal {
-  position: relative;
-  left: 0;
-  color: var(--text);
+  align-self: center;
+  font-size: 12px;
   font-weight: 600;
+  color: #1b2a41;
 }
 
 .progress-bar-wrapper {
   position: relative;
   width: 100%;
-  height: 16px;
-  overflow: hidden;
-  background: rgba(173, 190, 230, 0.1);
-  border-radius: 999px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  height: 22px;
+  background: #e6e6e3;
 }
 
 .progress-bar {
@@ -195,37 +193,42 @@
   top: 0;
   width: 0;
   height: 100%;
-  transition: width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.progress-bar.gop {
-  left: 0;
-  background: linear-gradient(90deg, var(--gop-deep), var(--gop));
+  transition: width 0.9s cubic-bezier(0.2, 0.7, 0.2, 1), left 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .progress-bar.dem {
+  left: 0;
+  background: #1f4c96;
+}
+
+.progress-bar.gop {
   right: 0;
-  background: linear-gradient(270deg, var(--dem-deep), var(--dem));
+  background: #d4101f;
 }
 
 .progress-bar.ind {
-  background: linear-gradient(90deg, #5a3a96, var(--ind));
+  background: #8a4fc8;
 }
 
 .threshold-marker {
   position: absolute;
-  top: -2px;
+  top: -4px;
   left: calc(270 / 538 * 100%);
   z-index: 5;
-  width: 2px;
-  height: calc(100% + 4px);
-  background: white;
+  width: 1px;
+  height: calc(100% + 8px);
+  background: #1b2a41;
 }
 
 .meter-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: #667085;
   font-variant-numeric: tabular-nums;
 }
 
 .stat-ind {
-  color: #c3a9ee;
+  color: #7a3fb5;
 }

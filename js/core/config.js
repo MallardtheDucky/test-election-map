@@ -34,19 +34,22 @@ export const ZOOM = {
 };
 
 export const COLORS = {
-  'Solid GOP': '#c0283a',
-  'Likely GOP': '#d8505a',
-  'Lean GOP': '#e5808a',
-  'Tilt GOP': '#f0b0b6',
-  'Tilt DEM': '#a9c9f1',
-  'Lean DEM': '#75a8e8',
-  'Likely DEM': '#3f82d9',
-  'Solid DEM': '#1f5fbf',
-  'Tilt IND': '#d3c1ee',
-  'Lean IND': '#b498df',
-  'Likely IND': '#9570cf',
-  'Solid IND': '#7347b4',
+  'Solid GOP': '#d6123a',
+  'Likely GOP': '#df4259',
+  'Lean GOP': '#e9788a',
+  'Tilt GOP': '#f3b1bb',
+  'Tilt DEM': '#b0d6f2',
+  'Lean DEM': '#76b7e8',
+  'Likely DEM': '#3d9ade',
+  'Solid DEM': '#2088d8',
+  'Tilt IND': '#d9c6f0',
+  'Lean IND': '#bc9ee3',
+  'Likely IND': '#a47bd4',
+  'Solid IND': '#8a4fc8',
   Tossup: '#e2b64a',
-  Uncalled: '#3a4766',
-  'No Data': '#18203a'
+  Uncalled: '#8c8c8c',
+  Counting: '#8c8c8c',
+  'No Results': '#cdcdcd',
+  'No Election': '#ececec',
+  'No Data': '#ececec'
 };

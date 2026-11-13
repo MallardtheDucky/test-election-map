@@ -1,6 +1,6 @@
 import { TOTAL_EV, TITLE_SUFFIX } from '../core/config.js';
 import { byId, formatNumber, formatReporting, shortName } from '../core/utils.js';
-import { mountAvatar } from './avatar.js';
+import { mountCutout } from './avatar.js';
 
 const refs = {
   title: byId('title'),
@@ -76,8 +76,8 @@ export function renderHeader(summary) {
 
   if (namesKey !== renderedNames) {
     renderedNames = namesKey;
-    mountAvatar(refs.avatarGop, gopName, 'gop');
-    mountAvatar(refs.avatarDem, demName, 'dem');
+    mountCutout(refs.avatarGop, gopName, 'gop');
+    mountCutout(refs.avatarDem, demName, 'dem');
     refs.nameGop.textContent = shortName(gopName);
     refs.nameDem.textContent = shortName(demName);
     refs.nameInd.textContent = shortName(summary.indCandidate || 'Independent');
@@ -87,8 +87,8 @@ export function renderHeader(summary) {
   animateValue(refs.evDem, summary.demEV, 600);
 
   const pct = value => (summary.totalPV > 0 ? (value / summary.totalPV) * 100 : 0);
-  refs.pvGop.textContent = `${formatNumber(summary.gopPV)} votes · ${pct(summary.gopPV).toFixed(1)}%`;
-  refs.pvDem.textContent = `${formatNumber(summary.demPV)} votes · ${pct(summary.demPV).toFixed(1)}%`;
+  refs.pvGop.textContent = `${formatNumber(summary.gopPV)} votes`;
+  refs.pvDem.textContent = `${formatNumber(summary.demPV)} votes`;
   refs.pvInd.textContent = `${summary.indEV} EV · ${formatNumber(summary.indPV)} votes (${pct(summary.indPV).toFixed(1)}%)`;
   refs.indWrap.hidden = summary.indPV <= 0 && summary.indEV <= 0;
 
@@ -99,5 +99,5 @@ export function renderHeader(summary) {
   refs.barGop.style.width = `${(summary.gopEV / TOTAL_EV) * 100}%`;
   refs.barDem.style.width = `${(summary.demEV / TOTAL_EV) * 100}%`;
   refs.barInd.style.width = `${(summary.indEV / TOTAL_EV) * 100}%`;
-  refs.barInd.style.right = `${(summary.demEV / TOTAL_EV) * 100}%`;
+  refs.barInd.style.left = `${(summary.demEV / TOTAL_EV) * 100}%`;
 }

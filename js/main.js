@@ -5,7 +5,6 @@ import { byId } from './core/utils.js';
 import { createMap } from './ui/map.js';
 import { setTitle, setSync, renderHeader } from './ui/header.js';
 import { initSidebar, renderSidebar, toggleSidebar, setSidebar, isSidebarOpen } from './ui/sidebar.js';
-import { renderTicker } from './ui/ticker.js';
 import { initLegend } from './ui/legend.js';
 import { checkWinner } from './ui/winner.js';
 import { showTooltip, hideTooltip, showPopup, hidePopup, isPopupOpen, showCountyPopup, showCountyTooltip } from './ui/popup.js';
@@ -24,6 +23,7 @@ let openState = null;
 let countyYears = [];
 let solved = null;
 let countyReady = null;
+let allMode = false;
 
 function sidebarInset() {
   return isSidebarOpen() && window.innerWidth > MOBILE_BREAKPOINT ? SIDEBAR_WIDTH : 0;
@@ -60,7 +60,28 @@ function clearSelection() {
   highlightSmallState(null);
 }
 
+function allResults() {
+  const all = new Map();
+  states.forEach(state => solveState(state).results.forEach((value, key) => all.set(key, value)));
+  return all;
+}
+
+function setAllMode(on) {
+  allMode = on;
+  document.querySelector('[data-toggle="counties"]').setAttribute('aria-pressed', String(on));
+  if (on) {
+    clearSelection();
+    map.reset();
+    map.showAllCounties(allResults());
+  } else {
+    map.hideAllCounties();
+  }
+}
+
 function selectState(state, point) {
+  if (allMode && state) {
+    setAllMode(false);
+  }
   if (!state) {
     clearSelection();
     return;
@@ -68,7 +89,7 @@ function selectState(state, point) {
   const stage = byId('stage').getBoundingClientRect();
   map.select(state.name);
   highlightSmallState(state.name);
-  map.zoomToState(state.name, sidebarInset());
+  map.zoomToState(state.name, sidebarInset(), window.innerWidth <= MOBILE_BREAKPOINT ? stage.height * 0.58 : 0);
   const run = openCounties(state);
   showPopup(state, [Math.max(8, stage.width - sidebarInset() - 330), 8], stateSummary(state, run));
   if (window.innerWidth <= MOBILE_BREAKPOINT) {
@@ -88,9 +109,11 @@ function render(result) {
   map.update(states);
   renderHeader(summary);
   renderSidebar(states);
-  renderTicker(states);
   renderSmallStates(states, (state, point) => selectState(state, point));
   highlightSmallState(map.selectedState());
+  if (allMode) {
+    map.updateAllCounties(allResults());
+  }
   const current = states.find(item => item.name === openState);
   if (current) {
     solved = solveState(current);
@@ -155,7 +178,7 @@ async function start() {
           }
         },
         onCountySelect: (county, result, point) => {
-          const state = states.find(item => item.name === openState);
+          const state = states.find(item => (allMode ? item.abbr === county.s : item.name === openState));
           showCountyPopup(county, result, state, point, countyYears);
         }
       });
@@ -175,7 +198,28 @@ async function start() {
 }
 
 function bindControls() {
+  const root = document.documentElement;
+  byId('btn-theme').addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = next;
+    try { localStorage.setItem('theme', next); } catch (e) { /* storage unavailable */ }
+  });
+  document.querySelectorAll('#toolbar [data-toggle]').forEach(button => {
+    button.addEventListener('click', () => {
+      const kind = button.dataset.toggle;
+      if (kind === 'counties') {
+        setAllMode(!allMode);
+        return;
+      }
+      const on = document.body.classList.toggle(kind === 'legend' ? 'show-legend' : 'show-small');
+      button.setAttribute('aria-pressed', String(on));
+    });
+  });
+
   byId('btn-reset').addEventListener('click', () => {
+    if (allMode) {
+      setAllMode(false);
+    }
     clearSelection();
     map.reset();
   });

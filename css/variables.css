@@ -21,5 +21,7 @@
   --font-body: 'Barlow', system-ui, sans-serif;
 
   --sidebar-width: 320px;
-  --ticker-height: 38px;
+  --page: #ffffff;
+  --page-text: #1b2a41;
+  --page-line: #dfe3ea;
 }

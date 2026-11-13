@@ -63,7 +63,7 @@ export function renderSidebar(states) {
 
     const info = el('div', 'state-info');
     info.appendChild(el('span', 'state-name', state.name));
-    const status = state.called ? 'Called' : 'Not called';
+    const status = state.called ? `Called ${state.leader}` : ['DEM', 'GOP', 'IND'].includes(state.leader) && state.total > 0 ? `${state.leader} leading` : 'Not called';
     info.appendChild(
       el(
         'span',

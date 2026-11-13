@@ -20,9 +20,14 @@
   <meta name="twitter:description" content="Live Federal Election Commission results map. Electoral votes, state totals and county-level results across the United States.">
   <meta name="twitter:image" content="https://mallardtheducky.github.io/Election-Map/images/fec-seal.png">
 
+  <script>
+    (function(){var t=null;try{t=localStorage.getItem('theme')}catch(e){}
+    if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+    document.documentElement.dataset.theme=t;})();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&family=Playfair+Display:wght@800;900&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
@@ -33,8 +38,8 @@
   <link rel="stylesheet" href="css/legend.css">
   <link rel="stylesheet" href="css/popup.css">
   <link rel="stylesheet" href="css/winner.css">
-  <link rel="stylesheet" href="css/ticker.css">
   <link rel="stylesheet" href="css/responsive.css">
+  <link rel="stylesheet" href="css/theme.css?v=1">
 </head>
 <body>
 
@@ -48,6 +53,11 @@
       <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
       <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></symbol>
       <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 9.5"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></symbol>
+      <symbol id="i-legend" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></symbol>
+      <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-2 6 2 6-2v14l-6 2-6-2-6 2V6Z"/><path d="M9 4v14M15 6v14"/></symbol>
     </defs>
   </svg>
 
@@ -66,6 +76,9 @@
         </div>
 
         <div class="header-controls">
+          <button class="btn-icon" id="btn-theme" type="button" title="Toggle light / dark" aria-label="Toggle light or dark mode">
+            <svg class="icon icon-sun"><use href="#i-sun"/></svg><svg class="icon icon-moon"><use href="#i-moon"/></svg>
+          </button>
           <button class="btn-icon" id="btn-reset" type="button" title="Reset map" aria-label="Reset map">
             <svg class="icon"><use href="#i-fit"/></svg>
           </button>
@@ -79,24 +92,23 @@
       </div>
 
       <div class="scoreboard">
-        <div class="cand cand-gop">
-          <div class="candidate-slot" id="avatar-gop"></div>
-          <div class="cand-text">
-            <span class="cand-name" id="name-gop"></span>
-            <span class="cand-pv" id="pv-gop">0 votes</span>
+        <div class="cand cand-dem">
+          <div class="candidate-slot" id="avatar-dem"></div>
+          <div class="cand-body">
+            <span class="cand-name" id="name-dem"></span>
+            <div class="cand-row">
+              <strong class="cand-ev" id="ev-dem">0</strong>
+              <span class="cand-stats"><span>electoral college votes</span><span id="pv-dem">0 votes</span></span>
+            </div>
           </div>
-          <strong class="cand-ev" id="ev-gop">0</strong>
         </div>
 
         <div class="meter">
-          <div class="meter-labels">
-            <span>Electoral votes</span>
-            <span class="meter-goal">270 to win</span>
-          </div>
+          <div class="meter-goal">270 to win</div>
           <div class="progress-bar-wrapper">
-            <div class="progress-bar gop" id="bar-gop"></div>
             <div class="progress-bar dem" id="bar-dem"></div>
             <div class="progress-bar ind" id="bar-ind"></div>
+            <div class="progress-bar gop" id="bar-gop"></div>
             <div class="threshold-marker"></div>
           </div>
           <div class="meter-foot">
@@ -105,19 +117,27 @@
           </div>
         </div>
 
-        <div class="cand cand-dem">
-          <strong class="cand-ev" id="ev-dem">0</strong>
-          <div class="cand-text">
-            <span class="cand-name" id="name-dem"></span>
-            <span class="cand-pv" id="pv-dem">0 votes</span>
+        <div class="cand cand-gop">
+          <div class="cand-body">
+            <span class="cand-name" id="name-gop"></span>
+            <div class="cand-row">
+              <span class="cand-stats"><span>electoral college votes</span><span id="pv-gop">0 votes</span></span>
+              <strong class="cand-ev" id="ev-gop">0</strong>
+            </div>
           </div>
-          <div class="candidate-slot" id="avatar-dem"></div>
+          <div class="candidate-slot" id="avatar-gop"></div>
         </div>
       </div>
     </header>
 
     <main id="stage">
       <div id="map"></div>
+
+      <div id="toolbar" role="toolbar" aria-label="Map options">
+        <button class="chip" type="button" data-toggle="legend" title="Legend" aria-label="Legend" aria-pressed="false"><svg class="icon"><use href="#i-legend"/></svg><span class="chip-label">Legend</span></button>
+        <button class="chip" type="button" data-toggle="small" title="Small states" aria-label="Small states" aria-pressed="false"><svg class="icon"><use href="#i-grid"/></svg><span class="chip-label">Small states</span></button>
+        <button class="chip" type="button" data-toggle="counties" title="All counties" aria-label="All counties" aria-pressed="false"><svg class="icon"><use href="#i-map"/></svg><span class="chip-label">All counties</span></button>
+      </div>
 
       <div id="small-states"></div>
 
@@ -130,10 +150,6 @@
         </button>
       </div>
 
-      <button id="legend-btn" type="button">
-        <svg class="icon"><use href="#i-layers"/></svg>
-        Legend
-      </button>
       <div id="legend-panel"></div>
 
       <div id="winner-banner">
@@ -160,13 +176,6 @@
       </aside>
     </main>
 
-    <footer id="ticker-bar">
-      <div class="ticker-label">Close races</div>
-      <div class="ticker-wrap">
-        <div class="ticker-content" id="ticker-content"></div>
-      </div>
-    </footer>
-
   </div>
 
   <script>
@@ -180,6 +189,6 @@
   <script src="vendor/d3.min.js"></script>
   <script src="vendor/topojson-client.min.js"></script>
   <script src="vendor/confetti.browser.js"></script>
-  <script type="module" src="js/main.js?v=3"></script>
+  <script type="module" src="js/main.js?v=4"></script>
 </body>
 </html>

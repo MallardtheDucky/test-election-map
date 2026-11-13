@@ -10,11 +10,11 @@
   }
 
   .cand-ev {
-    font-size: 42px;
+    font-size: 34px;
   }
 
   .cand-name {
-    font-size: 20px;
+    font-size: 21px;
   }
 }
 
@@ -49,17 +49,13 @@
     gap: 8px;
   }
 
-  .cand-text {
+  .cand-stats {
     display: none;
   }
 
-  .cand-gop .cand-ev {
-    order: 0;
-    margin-left: 0;
-  }
-
-  .cand-dem .cand-ev {
-    margin-right: 0;
+  .legend-row {
+    gap: 4px 10px;
+    font-size: 11px;
   }
 
   #sidebar {
@@ -70,7 +66,7 @@
   #small-states {
     top: auto;
     right: 8px;
-    bottom: 12px;
+    bottom: 64px;
     grid-template-columns: repeat(5, 38px);
     transform: none;
     gap: 4px;
@@ -86,18 +82,4 @@
     right: 8px;
   }
 
-  #legend-btn {
-    bottom: 12px;
-    left: 10px;
-  }
-
-  #legend-panel {
-    left: 10px;
-    bottom: 56px;
-  }
-
-  .ticker-label {
-    padding: 0 16px 0 12px;
-    font-size: 15px;
-  }
 }

@@ -1,3 +1,5 @@
+import { COLORS } from './config.js';
+
 export function evaluate(record) {
   const gop = record.votesGop;
   const dem = record.votesDem;
@@ -83,4 +85,24 @@ export function summarize(states) {
   });
 
   return summary;
+}
+
+export function leaningSide(state) {
+  if (!state || !state.hasData || state.total <= 0 || state.called) {
+    return null;
+  }
+  return ['DEM', 'GOP', 'IND'].includes(state.leader) ? state.leader : null;
+}
+
+export function stateColor(state) {
+  if (!state || !state.hasData) {
+    return COLORS['No Election'];
+  }
+  if (state.total <= 0) {
+    return COLORS['No Results'];
+  }
+  if (state.called) {
+    return COLORS[`Solid ${state.leader}`];
+  }
+  return leaningSide(state) ? COLORS[state.status] || COLORS.Counting : COLORS.Counting;
 }

@@ -1,4 +1,5 @@
 import { COLORS, SMALL_STATES, ZOOM } from '../core/config.js';
+import { stateColor, leaningSide } from '../core/election.js';
 import { countyByFips, countyStatus } from '../core/counties.js';
 
 function largestPolygon(feature) {
@@ -31,21 +32,20 @@ export function createMap(container, geometry, handlers) {
     .attr('role', 'img')
     .attr('aria-label', 'United States election map');
 
+
   const defs = svg.append('defs');
-  const hatch = defs
-    .append('pattern')
-    .attr('id', 'hatch')
-    .attr('width', 7)
-    .attr('height', 7)
-    .attr('patternUnits', 'userSpaceOnUse')
-    .attr('patternTransform', 'rotate(45)');
-  hatch.append('rect').attr('width', 7).attr('height', 7).attr('fill', 'transparent');
-  hatch.append('rect').attr('width', 2.2).attr('height', 7).attr('fill', 'rgba(10, 15, 30, 0.26)');
+  ['DEM', 'GOP', 'IND'].forEach(side =>
+    ['Solid', 'Likely', 'Lean', 'Tilt'].forEach(tier => {
+      const pattern = defs.append('pattern').attr('id', `hatch-${tier}-${side}`).attr('patternUnits', 'userSpaceOnUse').attr('width', 8).attr('height', 8).attr('patternTransform', 'rotate(45)');
+      pattern.append('rect').attr('width', 8).attr('height', 8).attr('fill', COLORS[`${tier} ${side}`]);
+      pattern.append('rect').attr('width', 3).attr('height', 8).attr('fill', 'rgba(255,255,255,0.5)');
+    })
+  );
 
   const background = svg.append('rect').attr('class', 'map-background');
   const viewport = svg.append('g').attr('class', 'viewport');
   const statesLayer = viewport.append('g').attr('class', 'states');
-  const hatchLayer = viewport.append('g').attr('class', 'hatches');
+  const allLayer = viewport.append('g').attr('class', 'allcounties');
   const countyLayer = viewport.append('g').attr('class', 'counties');
   const labelsLayer = svg.append('g').attr('class', 'labels');
 
@@ -130,7 +130,7 @@ export function createMap(container, geometry, handlers) {
       })
       .attr('fill', countyFill);
     statesLayer.classed('drilled', true);
-    hatches.attr('opacity', 0);
+    document.body.classList.add('drilled');
   }
 
   function updateCounties(results) {
@@ -140,20 +140,49 @@ export function createMap(container, geometry, handlers) {
     }
   }
 
+  let allPaths = null;
+  let allResults = new Map();
+  const allFill = f => COLORS[countyStatus(allResults.get(f.properties.f))];
+
+  function showAllCounties(results) {
+    allResults = results;
+    const subset = countyFeatures.filter(f => countyByFips(f.properties.f));
+    allPaths = allLayer
+      .selectAll('path')
+      .data(subset, f => f.properties.f)
+      .join('path')
+      .attr('class', 'county-all')
+      .attr('d', path)
+      .on('mouseenter mousemove', (event, f) => handlers.onCountyHover(countyByFips(f.properties.f), allResults.get(f.properties.f), d3.pointer(event, container)))
+      .on('mouseleave', () => handlers.onCountyHover(null))
+      .on('click', (event, f) => {
+        event.stopPropagation();
+        handlers.onCountySelect(countyByFips(f.properties.f), allResults.get(f.properties.f), d3.pointer(event, container));
+      })
+      .attr('fill', allFill);
+    document.body.classList.add('all-counties');
+  }
+
+  function updateAllCounties(results) {
+    allResults = results;
+    if (allPaths) {
+      allPaths.attr('fill', allFill);
+    }
+  }
+
+  function hideAllCounties() {
+    allPaths = null;
+    allLayer.selectAll('path').remove();
+    document.body.classList.remove('all-counties');
+  }
+
   function hideCounties() {
     openAbbr = null;
     countyPaths = null;
     countyLayer.selectAll('path').remove();
     statesLayer.classed('drilled', false);
+    document.body.classList.remove('drilled');
   }
-
-  const hatches = hatchLayer
-    .selectAll('path')
-    .data(geometry.features, feature => feature.id)
-    .join('path')
-    .attr('class', 'state-hatch')
-    .attr('fill', 'url(#hatch)')
-    .attr('opacity', 0);
 
   const labels = labelsLayer
     .selectAll('text')
@@ -189,8 +218,8 @@ export function createMap(container, geometry, handlers) {
     });
 
     paths.attr('d', path);
-    hatches.attr('d', path);
     countyLayer.selectAll('path').attr('d', path);
+    allLayer.selectAll('path').attr('d', path);
 
     zoom
       .extent([
@@ -207,7 +236,7 @@ export function createMap(container, geometry, handlers) {
 
   function fillFor(feature) {
     const state = stateFor(feature);
-    return COLORS[state ? state.status : 'No Data'] || COLORS['No Data'];
+    return leaningSide(state) ? `url(#hatch-${state.status.replace(' ', '-')})` : stateColor(state);
   }
 
   function positionLabels() {
@@ -233,8 +262,8 @@ export function createMap(container, geometry, handlers) {
       node
         .attr('display', null)
         .attr('transform', `translate(${x},${y})`)
-        .attr('fill', labelColor(fillFor(feature)))
-        .attr('data-tone', d3.lab(fillFor(feature)).l > 68 ? 'dark' : 'light');
+        .attr('fill', labelColor(stateColor(state)))
+        .attr('data-tone', d3.lab(stateColor(state)).l > 68 ? 'dark' : 'light');
       node.selectAll('tspan').remove();
       node
         .append('tspan')
@@ -259,16 +288,6 @@ export function createMap(container, geometry, handlers) {
       .transition()
       .duration(600)
       .attr('fill', fillFor);
-    hatches
-      .transition()
-      .duration(600)
-      .attr('opacity', feature => {
-        const state = stateFor(feature);
-        return !openAbbr && state && state.hasData && state.total > 0 && !state.called ? 1 : 0;
-      });
-    if (openAbbr) {
-      hatches.attr('opacity', 0);
-    }
     positionLabels();
   }
 
@@ -280,7 +299,7 @@ export function createMap(container, geometry, handlers) {
     }
   }
 
-  function zoomToState(name, insetRight = 0) {
+  function zoomToState(name, insetRight = 0, insetBottom = 0) {
     const feature = geometry.features.find(item => item.properties.name.toLowerCase() === name.toLowerCase());
     const cache = feature ? geometryCache.get(feature.id) : null;
     if (!cache) {
@@ -288,14 +307,15 @@ export function createMap(container, geometry, handlers) {
     }
     const [[x0, y0], [x1, y1]] = cache.bounds;
     const availableWidth = Math.max(width - insetRight, width * 0.4);
+    const availableHeight = Math.max(height - insetBottom, height * 0.3);
     const dx = Math.max(x1 - x0, 1);
     const dy = Math.max(y1 - y0, 1);
     const scale = Math.min(
       ZOOM.stateMax,
-      ZOOM.padding / Math.max(dx / availableWidth, dy / height)
+      ZOOM.padding / Math.max(dx / availableWidth, dy / availableHeight)
     );
     const target = d3.zoomIdentity
-      .translate(availableWidth / 2 - scale * ((x0 + x1) / 2), height / 2 - scale * ((y0 + y1) / 2))
+      .translate(availableWidth / 2 - scale * ((x0 + x1) / 2), availableHeight / 2 - scale * ((y0 + y1) / 2))
       .scale(scale);
     svg.transition().duration(750).call(zoom.transform, target);
   }
@@ -314,5 +334,5 @@ export function createMap(container, geometry, handlers) {
 
   layout();
 
-  return { update, select, setCountyFeatures, showCounties, updateCounties, hideCounties, zoomToState, zoomBy, reset, layout, selectedState };
+  return { showAllCounties, updateAllCounties, hideAllCounties, update, select, setCountyFeatures, showCounties, updateCounties, hideCounties, zoomToState, zoomBy, reset, layout, selectedState };
 }

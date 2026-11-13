@@ -1,4 +1,5 @@
-import { COLORS, SMALL_STATES } from '../core/config.js';
+import { SMALL_STATES } from '../core/config.js';
+import { stateColor, leaningSide } from '../core/election.js';
 import { byId, el } from '../core/utils.js';
 
 const container = byId('small-states');
@@ -8,11 +9,12 @@ export function renderSmallStates(states, onPick) {
   const tiles = SMALL_STATES.map(abbr => byAbbr.get(abbr))
     .filter(Boolean)
     .map(state => {
-      const tile = el('button', `small-tile${state.hasData && !state.called ? ' pending' : ''}`);
+      const tile = el('button', 'small-tile');
       tile.type = 'button';
       tile.title = `${state.name} • ${state.status}`;
       tile.dataset.name = state.name;
-      tile.style.setProperty('--tile', COLORS[state.status] || COLORS['No Data']);
+      tile.classList.toggle('leaning', Boolean(leaningSide(state)));
+      tile.style.setProperty('--tile', stateColor(state));
       tile.appendChild(el('span', 'small-abbr', state.abbr));
       tile.appendChild(el('span', 'small-ev', state.electoralVotes));
       tile.addEventListener('click', event => {
