@@ -1,6 +1,4 @@
-// canvas-confetti v1.6.0 built on 2022-10-24T21:26:41.619Z
 !(function (window, module) {
-// source content
 (function main(global, module, isWorker, workerSize) {
   var canUseWorker = !!(
     global.Worker &&
@@ -15,8 +13,6 @@
 
   function noop() {}
 
-  // create a promise if it exists, otherwise, just
-  // call the function directly
   function promise(func) {
     var ModulePromise = module.exports.Promise;
     var Prom = ModulePromise !== void 0 ? ModulePromise : global.Promise;
@@ -156,7 +152,6 @@
         try {
           worker = new Worker(URL.createObjectURL(new Blob([code])));
         } catch (e) {
-          // eslint-disable-next-line no-console
           typeof console !== undefined && typeof console.warn === 'function' ? console.warn('🎊 Could not load worker', e) : null;
 
           return null;
@@ -191,7 +186,6 @@
       '#ffa62d',
       '#ff36ff'
     ],
-    // probably should be true, but back-compat
     disableForReducedMotion: false,
     scalar: 1
   };
@@ -216,7 +210,6 @@
   }
 
   function randomInt(min, max) {
-    // [min, max)
     return Math.floor(Math.random() * (max - min)) + min;
   }
 
@@ -485,8 +478,6 @@
         );
       }
 
-      // if we have a previous canvas already animating,
-      // add to it
       if (animationObj) {
         return animationObj.addFettis(fettis);
       }
@@ -507,16 +498,13 @@
       }
 
       if (isLibCanvas && animationObj) {
-        // use existing canvas from in-progress animation
         canvas = animationObj.canvas;
       } else if (isLibCanvas && !canvas) {
-        // create and initialize a new canvas
         canvas = getCanvas(zIndex);
         document.body.appendChild(canvas);
       }
 
       if (allowResize && !initialized) {
-        // initialize the size of a user-supplied canvas
         resizer(canvas);
       }
 
@@ -537,7 +525,6 @@
 
       function onResize() {
         if (worker) {
-          // TODO this really shouldn't be immediate, because it is expensive
           var obj = {
             getBoundingClientRect: function () {
               if (!isLibCanvas) {
@@ -557,8 +544,6 @@
           return;
         }
 
-        // don't actually query the size here, since this
-        // can execute frequently and rapidly
         size.width = size.height = null;
       }
 
@@ -600,7 +585,6 @@
     return fire;
   }
 
-  // Make default export lazy to defer worker creation until called.
   var defaultFire;
   function getDefaultFire() {
     if (!defaultFire) {
@@ -628,7 +612,6 @@
   return this || {};
 })(), module, false));
 
-// end source content
 
   window.confetti = module.exports;
 }(window, {}));
