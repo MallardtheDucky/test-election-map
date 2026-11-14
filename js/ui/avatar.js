@@ -1,12 +1,19 @@
-import { CANDIDATE_IMAGES } from '../core/config.js';
 import { el, initials } from '../core/utils.js';
 
-const INLINE_IMAGES = (window.APRP_INLINE && window.APRP_INLINE.images) || {};
+const images = new Map();
+
+export function setCandidateImages(entries) {
+  images.clear();
+  Object.keys(entries).forEach(name => {
+    if (name && entries[name]) {
+      images.set(name, entries[name]);
+    }
+  });
+}
 
 export function createAvatar(name, party, className) {
   const wrapper = el('span', `avatar ${party} ${className || ''}`.trim());
-  const path = CANDIDATE_IMAGES[name];
-  const source = path ? INLINE_IMAGES[path] || encodeURI(path) : null;
+  const source = images.get(name) || null;
   const fallback = () => {
     wrapper.textContent = initials(name);
     wrapper.classList.add('avatar-initials');
@@ -14,6 +21,7 @@ export function createAvatar(name, party, className) {
   if (source) {
     const image = new Image();
     image.alt = name;
+    image.referrerPolicy = 'no-referrer';
     image.addEventListener('error', () => {
       image.remove();
       fallback();
@@ -32,8 +40,11 @@ export function mountAvatar(container, name, party, className) {
 
 const slug = name => String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-// Transparent PNG cutouts: images/cutouts/<candidate-name>.png, then images/cutouts/dem.png | gop.png
 export function mountCutout(container, name, party) {
+  if (images.has(name)) {
+    mountAvatar(container, name, party);
+    return;
+  }
   const tries = [`images/cutouts/${slug(name)}.png`, `images/cutouts/${party}.png`];
   const image = new Image();
   image.className = 'cutout';

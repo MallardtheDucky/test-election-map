@@ -13,11 +13,20 @@ function sheetUrl() {
 }
 
 async function fetchJson(url) {
-  const response = await fetch(url, { redirect: 'follow' });
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  let text;
+  try {
+    const response = await fetch(url, { redirect: 'follow', signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    text = await response.text();
+  } catch (error) {
+    throw error.name === 'AbortError' ? new Error('Request timed out') : error;
+  } finally {
+    clearTimeout(timer);
   }
-  const text = await response.text();
   try {
     return JSON.parse(text);
   } catch (error) {
@@ -41,7 +50,10 @@ function toRecord(raw) {
     called: typeof raw.called === 'boolean' ? raw.called : null,
     gopCandidate: raw.gop_candidate || '',
     demCandidate: raw.dem_candidate || '',
-    indCandidate: raw.ind_candidate || ''
+    indCandidate: raw.ind_candidate || '',
+    gopImage: raw.gop_image || '',
+    demImage: raw.dem_image || '',
+    indImage: raw.ind_image || ''
   };
 }
 
@@ -70,7 +82,7 @@ function parseResults(payload) {
   };
 }
 
-export async function loadResults() {
+export async function loadResults({ fallback = true } = {}) {
   const failures = [];
   const live = sheetUrl();
 
@@ -82,6 +94,10 @@ export async function loadResults() {
     } catch (error) {
       failures.push(`Google Sheet: ${error.message}`);
     }
+  }
+
+  if (!fallback) {
+    throw new Error(failures.join(' | ') || 'No live source');
   }
 
   try {

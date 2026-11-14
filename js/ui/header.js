@@ -47,19 +47,37 @@ export function setSync(result) {
   refs.sync.title = result.failures && result.failures.length ? result.failures.join('\n') : text;
 }
 
+const targets = new Map();
+const runs = new WeakMap();
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    targets.forEach((value, node) => {
+      runs.delete(node);
+      node.textContent = formatNumber(value);
+    });
+  }
+});
+
 function animateValue(node, end, duration) {
-  const start = Number(node.textContent.replace(/,/g, '')) || 0;
-  if (start === end) {
+  const from = targets.has(node) ? targets.get(node) : 0;
+  const token = {};
+  runs.set(node, token);
+  targets.set(node, end);
+  if (from === end || document.hidden) {
     node.textContent = formatNumber(end);
     return;
   }
   let startTime = null;
   function frame(time) {
+    if (runs.get(node) !== token) {
+      return;
+    }
     if (startTime === null) {
       startTime = time;
     }
     const progress = Math.min((time - startTime) / duration, 1);
-    node.textContent = formatNumber(Math.floor(start + (end - start) * progress));
+    node.textContent = formatNumber(Math.floor(from + (end - from) * progress));
     if (progress < 1) {
       requestAnimationFrame(frame);
     } else {
@@ -69,10 +87,15 @@ function animateValue(node, end, duration) {
   requestAnimationFrame(frame);
 }
 
+export function setSyncError() {
+  refs.sync.dataset.state = 'error';
+  refs.syncText.textContent = 'Update failed, showing last good results';
+}
+
 export function renderHeader(summary) {
   const gopName = summary.gopCandidate || 'Republican';
   const demName = summary.demCandidate || 'Democrat';
-  const namesKey = `${gopName}|${demName}`;
+  const namesKey = `${gopName}|${demName}|${summary.gopImage}|${summary.demImage}`;
 
   if (namesKey !== renderedNames) {
     renderedNames = namesKey;

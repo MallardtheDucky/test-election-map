@@ -53,7 +53,10 @@ export function summarize(states) {
     indPV: 0,
     gopCandidate: '',
     demCandidate: '',
-    indCandidate: ''
+    indCandidate: '',
+    gopImage: '',
+    demImage: '',
+    indImage: ''
   };
 
   states.forEach(state => {
@@ -81,6 +84,15 @@ export function summarize(states) {
     }
     if (!summary.indCandidate && state.indCandidate) {
       summary.indCandidate = state.indCandidate;
+    }
+    if (!summary.gopImage && state.gopImage) {
+      summary.gopImage = state.gopImage;
+    }
+    if (!summary.demImage && state.demImage) {
+      summary.demImage = state.demImage;
+    }
+    if (!summary.indImage && state.indImage) {
+      summary.indImage = state.indImage;
     }
   });
 

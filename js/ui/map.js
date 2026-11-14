@@ -32,7 +32,6 @@ export function createMap(container, geometry, handlers) {
     .attr('role', 'img')
     .attr('aria-label', 'United States election map');
 
-
   const defs = svg.append('defs');
   ['DEM', 'GOP', 'IND'].forEach(side =>
     ['Solid', 'Likely', 'Lean', 'Tilt'].forEach(tier => {

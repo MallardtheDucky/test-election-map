@@ -3,13 +3,14 @@ import { loadGeometry, loadResults } from './core/data.js';
 import { evaluate, summarize } from './core/election.js';
 import { byId } from './core/utils.js';
 import { createMap } from './ui/map.js';
-import { setTitle, setSync, renderHeader } from './ui/header.js';
+import { setTitle, setSync, setSyncError, renderHeader } from './ui/header.js';
 import { initSidebar, renderSidebar, toggleSidebar, setSidebar, isSidebarOpen } from './ui/sidebar.js';
 import { initLegend } from './ui/legend.js';
 import { checkWinner } from './ui/winner.js';
 import { showTooltip, hideTooltip, showPopup, hidePopup, isPopupOpen, showCountyPopup, showCountyTooltip } from './ui/popup.js';
 import { loadCounties, solveState } from './core/counties.js';
 import { renderSmallStates, highlightSmallState } from './ui/smallStates.js';
+import { setCandidateImages } from './ui/avatar.js';
 import { showLoader, hideLoader, showLoaderError } from './ui/loader.js';
 
 const SIDEBAR_WIDTH = 300;
@@ -106,6 +107,11 @@ function render(result) {
   setSync(result);
   states = result.records.map(evaluate);
   const summary = summarize(states);
+  setCandidateImages({
+    [summary.gopCandidate]: summary.gopImage,
+    [summary.demCandidate]: summary.demImage,
+    [summary.indCandidate]: summary.indImage
+  });
   map.update(states);
   renderHeader(summary);
   renderSidebar(states);
@@ -130,9 +136,10 @@ async function refresh() {
   const icon = document.querySelector('#btn-refresh .icon');
   icon.classList.add('spin');
   try {
-    render(await loadResults());
+    render(await loadResults({ fallback: false }));
   } catch (error) {
     console.error(error);
+    setSyncError();
   } finally {
     setTimeout(() => icon.classList.remove('spin'), 800);
     busy = false;
@@ -202,7 +209,7 @@ function bindControls() {
   byId('btn-theme').addEventListener('click', () => {
     const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
     root.dataset.theme = next;
-    try { localStorage.setItem('theme', next); } catch (e) { /* storage unavailable */ }
+    try { localStorage.setItem('theme', next); } catch (e) {  }
   });
   document.querySelectorAll('#toolbar [data-toggle]').forEach(button => {
     button.addEventListener('click', () => {

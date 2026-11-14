@@ -3,12 +3,9 @@ import { byId } from '../core/utils.js';
 const banner = byId('winner-banner');
 const text = byId('winner-text');
 
-let declared = false;
+let declaredKey = '';
 
 export function checkWinner(summary, winNumber) {
-  if (declared) {
-    return;
-  }
   let winner = null;
   let side = '';
   if (summary.gopEV >= winNumber) {
@@ -24,9 +21,15 @@ export function checkWinner(summary, winNumber) {
     side = 'ind';
   }
   if (!winner) {
+    declaredKey = '';
+    banner.classList.remove('show');
     return;
   }
-  declared = true;
+  const key = `${side}:${winner}`;
+  if (key === declaredKey) {
+    return;
+  }
+  declaredKey = key;
   text.textContent = `${winner} wins the presidency`;
   banner.dataset.side = side;
   banner.classList.add('show');

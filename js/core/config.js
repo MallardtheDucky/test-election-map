@@ -1,4 +1,4 @@
-export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxL4ws0DQr3D6GnoE4ACz6W5zfUUewzQf9ickwcAwNm3M6DTm_97hovDp5PVAPK5ArE/exec';
+export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxdhd2e15iRDB0KKSy0Z6girhkIYRptpxofJWVGD7d8LSiW1kkyUmf1Gy2mUiJcbFdK/exec';
 
 export const TITLE_SUFFIX = 'Election Center';
 
@@ -19,10 +19,6 @@ export const EXCLUDED_REGIONS = [
   'Puerto Rico',
   'United States Virgin Islands'
 ];
-
-export const CANDIDATE_IMAGES = {
-  'Jay Rockefeller': 'images/Jay_Rockefeller_portrait (3).jpg'
-};
 
 export const SMALL_STATES = ['VT', 'NH', 'MA', 'RI', 'CT', 'NJ', 'DE', 'MD', 'DC'];
 
