@@ -7,6 +7,8 @@ import { setTitle, setSync, setSyncError, renderHeader } from './ui/header.js';
 import { initSidebar, renderSidebar, toggleSidebar, setSidebar, isSidebarOpen } from './ui/sidebar.js';
 import { initLegend } from './ui/legend.js';
 import { checkWinner } from './ui/winner.js';
+import { trackCalls } from './core/calls.js';
+import { enqueue, presidentItem, setProjectionGeometry, stateItems } from './ui/projection.js';
 import { showTooltip, hideTooltip, showPopup, hidePopup, isPopupOpen, showCountyPopup, showCountyTooltip } from './ui/popup.js';
 import { loadCounties, solveState } from './core/counties.js';
 import { renderSmallStates, highlightSmallState } from './ui/smallStates.js';
@@ -25,6 +27,7 @@ let countyYears = [];
 let solved = null;
 let countyReady = null;
 let allMode = false;
+let latestSummary = null;
 
 function sidebarInset() {
   return isSidebarOpen() && window.innerWidth > MOBILE_BREAKPOINT ? SIDEBAR_WIDTH : 0;
@@ -125,8 +128,41 @@ function render(result) {
     solved = solveState(current);
     map.updateCounties(solved.results);
   }
-  checkWinner(summary, WIN_NUMBER);
+  latestSummary = summary;
+
+  const { live, fresh } = trackCalls(states, result);
+  const won = checkWinner(summary, WIN_NUMBER, { live });
+  const items = stateItems(fresh, summary);
+  if (won) {
+    items.push(presidentItem(won, summary, states));
+  }
+  enqueue(items);
 }
+
+function previewProjection(kind = 'state', abbr = '') {
+  if (!latestSummary) {
+    return 'Results have not loaded yet';
+  }
+  if (kind === 'president') {
+    const banner = byId('winner-banner');
+    const side = banner.classList.contains('show')
+      ? banner.dataset.side
+      : latestSummary.demEV >= latestSummary.gopEV ? 'dem' : 'gop';
+    enqueue([presidentItem({ side }, latestSummary, states)]);
+    return 'Playing the presidency graphic';
+  }
+  const pool = states.filter(state => state.leader !== 'Tossup' && state.total > 0);
+  const picks = abbr
+    ? abbr.split(',').map(code => pool.find(state => state.abbr === code.trim().toUpperCase())).filter(Boolean)
+    : [pool.find(state => state.called) || pool[0]].filter(Boolean);
+  if (!picks.length) {
+    return 'No state with votes matched';
+  }
+  enqueue(stateItems(picks, latestSummary));
+  return `Playing ${picks.length} state graphic${picks.length === 1 ? '' : 's'}`;
+}
+
+window.electionPreview = previewProjection;
 
 async function refresh() {
   if (busy) {
@@ -154,6 +190,7 @@ async function start() {
       loadResults()
     ]);
     geometry = geo;
+    setProjectionGeometry(geo);
     if (!countyReady) {
       const counties = await loadCounties();
       countyYears = counties.years;
@@ -232,6 +269,7 @@ function bindControls() {
   });
   byId('btn-refresh').addEventListener('click', refresh);
   byId('btn-sidebar').addEventListener('click', toggleSidebar);
+  byId('winner-banner').addEventListener('click', () => previewProjection('president'));
   byId('zoom-in').addEventListener('click', () => map.zoomBy(1.6));
   byId('zoom-out').addEventListener('click', () => map.zoomBy(1 / 1.6));
 

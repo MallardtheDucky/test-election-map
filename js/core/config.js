@@ -12,6 +12,13 @@ export const LOCAL_RESULTS_URL = 'data/results.json';
 
 export const AUTO_REFRESH_MS = 30000;
 
+export const PROJECTION = {
+  stateMs: 7600,
+  fastMs: 4200,
+  fastAfter: 3,
+  presidentAutoCloseMs: 0
+};
+
 export const EXCLUDED_REGIONS = [
   'American Samoa',
   'Commonwealth of the Northern Mariana Islands',

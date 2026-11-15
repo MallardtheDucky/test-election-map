@@ -61,3 +61,36 @@ export function mountCutout(container, name, party) {
   image.src = tries[0];
   container.replaceChildren(image);
 }
+
+export function candidateImageUrls(name, party) {
+  const urls = [];
+  if (images.has(name)) {
+    urls.push(images.get(name));
+  }
+  urls.push(`images/cutouts/${slug(name)}.png`, `images/cutouts/${party}.png`);
+  return urls;
+}
+
+const portraitCache = new Map();
+
+export function loadPortrait(name, party) {
+  const urls = candidateImageUrls(name, party);
+  const key = urls.join('|');
+  if (portraitCache.has(key)) {
+    return portraitCache.get(key);
+  }
+  const attempt = index => new Promise(resolve => {
+    if (index >= urls.length) {
+      resolve(null);
+      return;
+    }
+    const image = new Image();
+    image.referrerPolicy = 'no-referrer';
+    image.onload = () => resolve(urls[index]);
+    image.onerror = () => attempt(index + 1).then(resolve);
+    image.src = urls[index];
+  });
+  const promise = attempt(0);
+  portraitCache.set(key, promise);
+  return promise;
+}
