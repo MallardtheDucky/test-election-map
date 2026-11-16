@@ -26,7 +26,7 @@ export function checkWinner(summary, winNumber, { live = false } = {}) {
     return null;
   }
   const key = `${side}:${winner}`;
-  text.textContent = `${winner} wins the presidency`;
+  text.textContent = `${winner} wins the presidency · ${summary[`${side}EV`]} electoral votes`;
   banner.dataset.side = side;
   banner.classList.add('show');
   if (key === declaredKey) {

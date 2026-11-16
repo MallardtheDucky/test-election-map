@@ -1,6 +1,24 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const OUT_MS = 650;
 
+const FONT_SPECS = [
+  '900 100px "Big Shoulders Display"',
+  '800 100px "Big Shoulders Display"',
+  '700 100px "Big Shoulders Display"',
+  '600 16px "Hanken Grotesk"',
+  '700 16px "Hanken Grotesk"'
+];
+
+export function loadFonts() {
+  if (!document.fonts || !document.fonts.load) {
+    return Promise.resolve();
+  }
+  const loads = Promise.all(FONT_SPECS.map(spec => document.fonts.load(spec))).catch(() => null);
+  return Promise.race([loads, new Promise(resolve => setTimeout(resolve, 1500))]);
+}
+
+loadFonts();
+
 export const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export const SIDES = {
@@ -31,8 +49,8 @@ export function layoutCanvas(root) {
   const w = window.innerWidth;
   const h = window.innerHeight;
   const portrait = h / w > 1.05;
-  const cw = portrait ? 720 : 1280;
-  const ch = portrait ? 1280 : 720;
+  const cw = portrait ? 540 : 1280;
+  const ch = portrait ? Math.max(1120, Math.round((540 * h) / w)) : 720;
   root.dataset.orient = portrait ? 'port' : 'land';
   root.style.setProperty('--cw', `${cw}px`);
   root.style.setProperty('--ch', `${ch}px`);
@@ -115,23 +133,6 @@ export function silhouette(feature, width, height, pad = 24) {
   return svg;
 }
 
-export function hemicycle({ total = 538, rows = 11, inner = 172, outer = 292, cx = 320, cy = 320 } = {}) {
-  const radii = Array.from({ length: rows }, (_, i) => inner + ((outer - inner) * i) / (rows - 1));
-  const sum = radii.reduce((a, b) => a + b, 0);
-  const counts = radii.map(r => Math.round((total * r) / sum));
-  counts[rows - 1] += total - counts.reduce((a, b) => a + b, 0);
-  const seats = [];
-  radii.forEach((r, row) => {
-    const n = counts[row];
-    for (let j = 0; j < n; j += 1) {
-      const angle = Math.PI * (1 - (n === 1 ? 0.5 : j / (n - 1)));
-      seats.push({ x: cx + r * Math.cos(angle), y: cy - r * Math.sin(angle), angle, row });
-    }
-  });
-  seats.sort((a, b) => b.angle - a.angle || a.row - b.row);
-  return seats;
-}
-
 const openLayers = [];
 let keyBound = false;
 
@@ -155,8 +156,7 @@ export function present(root, { hold = 0, backdropCloses = true, onStart } = {})
   };
   window.addEventListener('resize', onResize);
 
-  const ready = document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve();
-  return ready.then(
+  return loadFonts().then(
     () =>
       new Promise(resolve => {
         let ended = false;

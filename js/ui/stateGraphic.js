@@ -1,14 +1,9 @@
 import { formatNumber, formatReporting, initials } from '../core/utils.js';
-import { loadPortrait } from './avatar.js';
 import { countUp, make, present, silhouette, splitName, SIDES, reducedMotion } from './graphicKit.js';
 import { PROJECTION } from '../core/config.js';
 
 const CHECK =
   '<svg class="pj-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8 9.6 18 19.5 6.5"/></svg>';
-
-const HEAD =
-  '<svg class="pj-ghost" viewBox="0 0 200 240" aria-hidden="true"><circle cx="100" cy="82" r="46"/>' +
-  '<path d="M16 240c0-58 38-92 84-92s84 34 84 92Z"/></svg>';
 
 function tallyHtml(tally) {
   const pct = value => `${(value / 538) * 100}%`;
@@ -50,7 +45,7 @@ export function buildState(data) {
           </div>
         </div>
         <div class="pj-copy">
-          <h2 class="pj-state-name"><span data-fit="112"></span></h2>
+          <h2 class="pj-state-name"><span data-fit="118"></span></h2>
           <p class="pj-ev"><b></b><span> electoral votes</span></p>
           <div class="pj-tag"><span class="pj-tag-body">${CHECK}<span>Projected winner</span></span></div>
           <p class="pj-first"></p>
@@ -109,7 +104,6 @@ export function buildState(data) {
   holder.appendChild(silhouette(data.feature, 560, 560));
 
   const media = root.querySelector('.pj-portrait-media');
-  media.innerHTML = HEAD;
   const monogram = make(`<span class="pj-monogram"></span>`);
   monogram.textContent = initials(data.candidate || side.label);
   media.appendChild(monogram);

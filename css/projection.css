@@ -6,18 +6,20 @@
   --yellow: #ffd21f;
   --yellow-deep: #e8a900;
   --paper: #f4f7ff;
+  --pj-display: 'Big Shoulders Display', 'Arial Narrow', 'Roboto Condensed', sans-serif;
+  --pj-body: 'Hanken Grotesk', system-ui, sans-serif;
   position: fixed;
   inset: 0;
   z-index: 4000;
   overflow: hidden;
   color: var(--paper);
-  font-family: var(--font-display);
+  font-family: var(--pj-display);
   background: #050912;
   opacity: 0;
   transition: opacity 0.45s ease;
   cursor: pointer;
 }
-.pj-president { z-index: 4100; cursor: default; }
+.pj-president { z-index: 4100; }
 .pj.is-in { opacity: 1; }
 .pj.is-out { opacity: 0; transition-duration: 0.6s; pointer-events: none; }
 
@@ -25,7 +27,6 @@
 .pj[data-side='gop'] { --c: #e0334a; --c-light: #ff7c8b; --c-deep: #7e1426; --c-glow: rgba(224, 51, 74, 0.55); }
 .pj[data-side='ind'] { --c: #9a6fe0; --c-light: #c7a8ff; --c-deep: #4a2c8a; --c-glow: rgba(154, 111, 224, 0.55); }
 
-/* ---------- backdrop ---------- */
 .pj-bg { position: absolute; inset: 0; overflow: hidden; }
 .pj-glow {
   position: absolute;
@@ -57,7 +58,6 @@
   background: radial-gradient(120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.6) 100%);
 }
 
-/* ---------- scaled canvas ---------- */
 .pj-canvas {
   position: absolute;
   left: 50%;
@@ -69,7 +69,6 @@
 }
 .pj [hidden] { display: none !important; }
 
-/* ---------- shared pieces ---------- */
 .pj-tag {
   display: inline-block;
   transform: skewX(-12deg);
@@ -132,7 +131,7 @@
 
 .pj-last {
   line-height: 0.88;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.005em;
   color: #fff;
@@ -170,17 +169,15 @@
 }
 .pj-stats li:first-child { padding-left: 0; border-left: 0; }
 .pj-stats b { font-size: 50px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-.pj-stats span { font-family: var(--font-body); font-size: 17px; font-weight: 500; color: rgba(244, 247, 255, 0.72); }
+.pj-stats span { font-family: var(--pj-body); font-size: 17px; font-weight: 500; color: rgba(244, 247, 255, 0.72); }
 
-.pj-portrait-media,
-.pres-portrait-media {
+.pj-portrait-media {
   position: absolute;
   inset: 0;
   overflow: hidden;
   background: linear-gradient(165deg, var(--c-light) -30%, var(--c) 35%, var(--c-deep) 100%);
 }
-.pj-portrait-media img,
-.pres-portrait-media img {
+.pj-portrait-media img {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -188,7 +185,6 @@
   object-fit: cover;
   object-position: center 18%;
 }
-.pj-ghost { display: none; }
 .pj-monogram {
   position: absolute;
   left: 0;
@@ -202,7 +198,6 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* ---------- controls / progress ---------- */
 .pj-controls {
   position: absolute;
   right: 28px;
@@ -218,7 +213,7 @@
   background: rgba(5, 9, 18, 0.55);
   backdrop-filter: blur(6px);
   color: var(--paper);
-  font-family: var(--font-body);
+  font-family: var(--pj-body);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -226,8 +221,6 @@
 }
 .pj-btn:hover { background: rgba(244, 247, 255, 0.16); border-color: rgba(244, 247, 255, 0.7); }
 .pj-btn-quiet { border-color: transparent; background: transparent; color: rgba(244, 247, 255, 0.7); }
-.pj-btn-solid { background: var(--yellow); border-color: var(--yellow); color: #1a1400; padding: 11px 24px; font-size: 15px; font-weight: 700; }
-.pj-btn-solid:hover { background: #ffe45c; border-color: #ffe45c; }
 .pj-btn:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 
 .pj-progress {
@@ -246,12 +239,8 @@
   transform-origin: left;
   transform: scaleX(0);
 }
-.pj-state.is-in .pj-progress i { animation: pj-progress var(--hold, 7600ms) linear both; }
-.pj-president .pj-progress { display: none; }
+.pj.is-in .pj-progress i { animation: pj-progress var(--hold, 7600ms) linear both; }
 
-/* =====================================================================
-   STATE GRAPHIC
-   ===================================================================== */
 .pj-silhouette {
   position: absolute;
   width: 600px;
@@ -315,7 +304,7 @@
   width: 760px;
   --fit-w: 760px;
 }
-.pj-state .pj-state-name { font-size: 112px; font-weight: 800; line-height: 0.9; text-transform: uppercase; color: #fff; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
+.pj-state .pj-state-name { font-size: 118px; font-weight: 900; line-height: 0.9; text-transform: uppercase; color: #fff; text-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); }
 .pj-state .pj-ev { margin-top: 4px; font-size: 36px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: rgba(244, 247, 255, 0.82); }
 .pj-state .pj-ev b { color: var(--c-light); font-weight: 800; }
 .pj-state .pj-tag { margin-top: 16px; }
@@ -341,7 +330,6 @@
 .pj-state.is-in .pj-stats li:nth-child(2) { animation: pj-rise 0.6s 2.3s var(--ease) both; }
 .pj-state.is-in .pj-stats li:nth-child(3) { animation: pj-rise 0.6s 2.45s var(--ease) both; }
 
-/* tally strip */
 .pj-tally {
   position: absolute;
   left: 78px;
@@ -399,13 +387,12 @@
   position: absolute;
   left: 78px;
   bottom: 14px;
-  font-family: var(--font-body);
+  font-family: var(--pj-body);
   font-size: 14px;
   font-weight: 500;
   color: rgba(244, 247, 255, 0.6);
 }
 
-/* fast mode */
 .pj-state.is-fast.is-in .pj-state-name span { animation-delay: 0.15s; animation-duration: 0.6s; }
 .pj-state.is-fast.is-in .pj-ev { animation-delay: 0.35s; }
 .pj-state.is-fast.is-in .pj-portrait-card { animation-delay: 0.2s; animation-duration: 0.8s; }
@@ -421,14 +408,11 @@
 .pj-state.is-fast.is-in .pj-shape-glow { animation-duration: 0.9s; animation-delay: 0.1s; }
 .pj-state.is-fast.is-in .pj-shape-fill { animation-delay: 0.7s; }
 
-/* =====================================================================
-   PRESIDENT GRAPHIC
-   ===================================================================== */
 .pj-president .pj-bg { background: #050912; }
 .pj-rays {
   position: absolute;
-  left: 73%;
-  top: 46%;
+  left: 76%;
+  top: 52%;
   width: 190vmax;
   height: 190vmax;
   margin: -95vmax 0 0 -95vmax;
@@ -438,13 +422,41 @@
 }
 .pj-president.is-in .pj-rays { animation: pj-rays-in 2s 0.2s ease-out both, pj-spin 150s linear infinite; }
 
-.pres-text { position: absolute; left: 76px; top: 78px; width: 560px; --fit-w: 560px; }
-.pres-office { margin-top: 30px; font-size: 26px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(244, 247, 255, 0.72); }
-.pj-president .pj-first { margin-top: 18px; font-size: 58px; }
+.pres-text { position: absolute; left: 76px; top: 70px; width: 560px; --fit-w: 560px; }
+.pres-office { margin-top: 24px; font-size: 24px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 247, 255, 0.72); }
+.pj-president .pj-first { margin-top: 14px; font-size: 60px; }
 .pj-president .pj-last { margin-top: 2px; }
-.pres-wins { margin-top: 22px; font-size: 52px; font-weight: 700; text-transform: uppercase; color: #fff; text-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
-.pj-president .pj-stats { margin-top: 40px; }
+.pres-wins { margin-top: 18px; font-size: 46px; font-weight: 700; text-transform: uppercase; color: #fff; text-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
+.pj-president .pj-stats { margin-top: 28px; }
+.pj-president .pj-stats { width: 600px; }
+.pj-president .pj-stats li { padding: 0 18px; }
+.pj-president .pj-stats li:first-child { padding-left: 0; }
 .pj-president .pj-stats b { font-size: 46px; }
+.pj-president .pj-stats span { font-size: 16px; }
+.st-win b { color: var(--yellow); text-shadow: 0 0 34px rgba(255, 210, 31, 0.5); }
+.st-opp[data-side='dem'] b { color: #7db7ff; }
+.st-opp[data-side='gop'] b { color: #ff8b97; }
+.st-opp[data-side='ind'] b { color: #c7a8ff; }
+.pres-pending {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 0;
+  font-family: var(--pj-body);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: rgba(244, 247, 255, 0.86);
+  opacity: 0;
+}
+.pres-pending i {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--yellow);
+  animation: pj-pulse 1.6s ease-out infinite;
+}
 
 .pj-president .pj-tag,
 .pj-president .pres-office,
@@ -459,98 +471,162 @@
 .pj-president.is-in .pj-first { animation: pj-rise 0.7s 1.3s var(--ease) both; }
 .pj-president.is-in .pj-last span { animation: pj-slam 0.9s 1.45s var(--ease) both; }
 .pj-president.is-in .pres-wins { animation: pj-rise 0.8s 2.1s var(--ease) both; }
-.pj-president.is-in .pj-stats li:nth-child(1) { animation: pj-rise 0.6s 2.7s var(--ease) both; }
-.pj-president.is-in .pj-stats li:nth-child(2) { animation: pj-rise 0.6s 2.85s var(--ease) both; }
-.pj-president.is-in .pj-stats li:nth-child(3) { animation: pj-rise 0.6s 3s var(--ease) both; }
+.pj-president.is-in .pj-stats li:nth-child(1) { animation: pj-rise 0.6s 2.6s var(--ease) both; }
+.pj-president.is-in .pj-stats li:nth-child(2) { animation: pj-rise 0.6s 2.75s var(--ease) both; }
+.pj-president.is-in .pj-stats li:nth-child(3) { animation: pj-rise 0.6s 2.9s var(--ease) both; }
+.pj-president.is-in .pj-stats li:nth-child(4) { animation: pj-rise 0.6s 3.05s var(--ease) both; }
+.pj-president.is-in .pres-pending { animation: pj-rise 0.7s 3.7s var(--ease) both; }
 
-.pres-chamber { position: absolute; left: 604px; top: 140px; width: 640px; height: 520px; }
-.pres-seat-holder { position: absolute; left: 0; top: 0; width: 640px; height: 340px; }
-.pres-seats { width: 100%; height: 100%; overflow: visible; }
-.seat { fill: rgba(244, 247, 255, 0.14); opacity: 0; transform-box: fill-box; transform-origin: center; }
-.seat-dem { fill: #4d93e6; }
-.seat-gop { fill: #ee5360; }
-.seat-ind { fill: #a98be0; }
-.seat-over { fill: var(--yellow); }
-.pj-president.is-in .seat { animation: pj-seat 0.5s var(--ease) both; animation-delay: calc(0.9s + var(--d)); }
-.pj-president.is-in .seat-over { animation: pj-seat 0.5s var(--ease) both, pj-seat-glint 1.4s ease-in-out 3.4s both; animation-delay: calc(0.9s + var(--d)), 3.4s; }
-
-.pres-portrait {
-  position: absolute;
-  left: 190px;
-  top: 190px;
-  width: 260px;
-  height: 260px;
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid var(--yellow);
-  box-shadow: 0 0 0 10px rgba(5, 9, 18, 0.7), 0 0 80px var(--c-glow), 0 24px 50px rgba(0, 0, 0, 0.6);
-  opacity: 0;
-}
-.pj-president.is-in .pres-portrait { animation: pj-portrait 1s 0.9s var(--ease) both; }
-.pres-ring {
+.pres-scene { position: absolute; left: 640px; top: 66px; width: 640px; height: 620px; perspective: 1700px; perspective-origin: 50% 24%; }
+.pres-beam {
   position: absolute;
   left: 160px;
-  top: 160px;
+  top: 0;
   width: 320px;
-  height: 320px;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent, rgba(255, 210, 31, 0.7), transparent 40%, transparent 60%, rgba(255, 210, 31, 0.5), transparent);
-  mask-image: radial-gradient(circle, transparent 58%, #000 60%, #000 64%, transparent 66%);
+  height: 380px;
+  background: linear-gradient(to top, color-mix(in srgb, var(--c-light) 60%, transparent), transparent 88%);
+  clip-path: polygon(34% 0, 66% 0, 100% 100%, 0 100%);
+  filter: blur(8px);
+  opacity: 0;
+  transform-origin: bottom;
+}
+.pj-president.is-in .pres-beam { animation: pj-beam 1.2s 1s var(--ease) both; }
+.pres-card {
+  position: absolute;
+  left: 185px;
+  top: 0;
+  width: 270px;
+  height: 350px;
+  overflow: hidden;
+  border: 4px solid var(--yellow);
+  border-radius: 6px;
+  outline: 2px solid rgba(255, 255, 255, 0.35);
+  outline-offset: -12px;
+  transform: rotateY(-16deg) rotateX(2deg);
+  box-shadow:
+    2px 3px 0 #c99a0a,
+    4px 6px 0 #b08508,
+    6px 9px 0 #977207,
+    8px 12px 0 #7e6006,
+    10px 15px 0 #654e05,
+    0 0 90px var(--c-glow),
+    30px 46px 60px rgba(0, 0, 0, 0.65);
   opacity: 0;
 }
-.pj-president.is-in .pres-ring { animation: pj-rays-in 1s 1.4s ease-out both, pj-spin 14s linear infinite; }
+.pj-president.is-in .pres-card { animation: pj-pcard-in 1.2s 0.8s var(--ease) both, pj-sway 7s 2s ease-in-out infinite alternate; }
+.pj-president.is-in .pres-card .pj-sheen::before { animation: pj-sweep 1.3s 2.1s ease-in-out both; }
+.pres-card-media { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(165deg, var(--c-light) -30%, var(--c) 35%, var(--c-deep) 100%); }
+.pres-card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 18%; }
+.pres-card .pj-monogram { font-size: 100px; }
 
-.pres-notch { position: absolute; left: 320px; top: -22px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; opacity: 0; }
-.pres-notch em { font-style: normal; font-size: 22px; font-weight: 800; color: var(--yellow); letter-spacing: 0.04em; }
-.pres-notch i { display: block; width: 3px; height: 26px; margin-top: 2px; background: var(--yellow); border-radius: 2px; }
-.pj-president.is-in .pres-notch { animation: pj-rise 0.6s 2.4s var(--ease) both; }
+.pres-map { position: absolute; left: 20px; top: 262px; width: 600px; height: 380px; opacity: 0; transform: rotateX(56deg); }
+.pres-map::before {
+  content: '';
+  position: absolute;
+  inset: -4% -6%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--c-glow), transparent 78%);
+}
+.pres-map::after {
+  content: '';
+  position: absolute;
+  inset: 6% 2%;
+  border: 6px solid var(--yellow);
+  border-radius: 50%;
+  opacity: 0;
+}
+.pj-president.is-in .pres-map { animation: pj-map-in 1.3s 0.3s var(--ease) both; }
+.pj-president.is-declared .pres-map::after { animation: pj-shock 1.6s ease-out both; }
+.pres-map-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+.m-tops {
+  filter:
+    drop-shadow(0 1.5px 0 #0a1330)
+    drop-shadow(0 3px 0 #0a1330)
+    drop-shadow(0 4.5px 0 #0a1330)
+    drop-shadow(0 6px 0 #0a1330)
+    drop-shadow(0 12px 14px rgba(0, 0, 0, 0.6));
+}
+.m-state {
+  fill: rgba(150, 168, 205, 0.16);
+  stroke: rgba(255, 255, 255, 0.28);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+  transition: transform 0.5s var(--punch), fill 0.4s ease;
+}
+.m-win.lit { fill: var(--c); stroke: rgba(255, 255, 255, 0.85); transform: translateY(-7px); animation: pj-lit 0.8s ease-out both; }
+.m-opp.lit { fill: var(--oc); stroke: rgba(255, 255, 255, 0.5); transform: translateY(-3px); }
+.pj-president[data-opp='dem'] { --oc: #2f6fc4; }
+.pj-president[data-opp='gop'] { --oc: #b42a3c; }
+.pj-president[data-opp='ind'] { --oc: #7a52bd; }
 
-.pres-count { position: absolute; top: 378px; display: flex; flex-direction: column; gap: 2px; opacity: 0; }
-.pres-count b { font-size: 112px; font-weight: 800; line-height: 0.9; font-variant-numeric: tabular-nums; }
-.pres-count span { font-family: var(--font-body); font-size: 17px; font-weight: 600; letter-spacing: 0.02em; }
-.pres-count-dem { left: 0; color: #7db7ff; align-items: flex-start; }
-.pres-count-gop { right: 0; color: #ff8b97; align-items: flex-end; }
-.pj-president[data-side='dem'] .pres-count-dem b,
-.pj-president[data-side='gop'] .pres-count-gop b { color: var(--yellow); text-shadow: 0 0 40px rgba(255, 210, 31, 0.45); }
-.pj-president.is-in .pres-count { animation: pj-rise 0.8s 2.5s var(--ease) both; }
+.pres-bar { position: absolute; left: 40px; top: 590px; width: 560px; height: 14px; background: rgba(244, 247, 255, 0.12); border-radius: 999px; opacity: 0; }
+.pj-president.is-in .pres-bar { animation: pj-rise 0.8s 1.3s var(--ease) both; }
+.pres-bar i { position: absolute; top: 0; bottom: 0; width: 0; }
+.b-win { left: 0; border-radius: 999px 0 0 999px; background: linear-gradient(90deg, var(--c-deep), var(--c-light)); }
+.b-over { background: linear-gradient(90deg, #e8a900, #ffe45c); box-shadow: 0 0 18px rgba(255, 210, 31, 0.8); }
+.b-opp { right: 0; border-radius: 0 999px 999px 0; background: var(--oc); }
+.b-mark { position: absolute; top: -8px; bottom: -8px; width: 4px; margin-left: -2px; background: var(--yellow); border-radius: 2px; }
+.b-mark em { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 24px; font-weight: 800; color: var(--yellow); }
+.pj-president.is-declared .b-mark em { animation: pj-tick-pop 1s var(--punch) both; }
 
-.pj-president .pj-controls { top: 26px; right: 30px; }
 
-/* =====================================================================
-   PORTRAIT ORIENTATION (phones held upright)
-   ===================================================================== */
-.pj[data-orient='port'] .pj-silhouette { width: 560px; height: 560px; right: 80px; top: 30px; opacity: 0.9; }
-.pj[data-orient='port'] .pj-portrait { left: 40px; top: 352px; width: 290px; height: 340px; }
-.pj[data-orient='port'] .pj-copy { left: 40px; top: 70px; width: 640px; --fit-w: 640px; }
-.pj[data-orient='port'] .pj-state .pj-state-name,
-.pj-state[data-orient='port'] .pj-state-name { font-size: 112px; }
-.pj-state[data-orient='port'] .pj-tag { position: absolute; left: 0; top: 270px; margin: 0; }
-.pj-state[data-orient='port'] .pj-first { position: absolute; left: 0; top: 662px; margin: 0; font-size: 42px; }
-.pj-state[data-orient='port'] .pj-last { position: absolute; left: 0; top: 712px; margin: 0; width: 600px; --fit-w: 600px; }
-.pj-state[data-orient='port'] .pj-stats { position: absolute; left: 0; top: 880px; width: 640px; margin: 0; }
-.pj-state[data-orient='port'] .pj-stats li { padding: 0 20px; }
-.pj-state[data-orient='port'] .pj-stats b { font-size: 42px; }
-.pj-state[data-orient='port'] .pj-tally { left: 40px; right: 40px; bottom: 64px; grid-template-columns: 1fr 1fr; gap: 14px 20px; padding: 18px 22px; }
-.pj-state[data-orient='port'] .tally-mid { grid-column: 1 / -1; grid-row: 2; }
-.pj-state[data-orient='port'] .tally-num { font-size: 56px; }
-.pj-state[data-orient='port'] .pj-meta { left: 40px; }
-.pj[data-orient='port'] .pj-controls { top: auto; bottom: 14px; right: 24px; }
+.pj[data-orient='port'] .pj-canvas {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  padding: 72px 28px 60px;
+}
+.pj[data-orient='port'] .pj-controls { top: calc(14px + env(safe-area-inset-top, 0px)); right: 14px; bottom: auto; }
+.pj[data-orient='port'] .pj-progress { bottom: env(safe-area-inset-bottom, 0px); }
 
-.pj-president[data-orient='port'] .pres-chamber { left: 40px; top: 190px; }
-.pj-president[data-orient='port'] .pres-text { left: 40px; top: 810px; width: 640px; --fit-w: 640px; }
+.pj-state[data-orient='port'] .pj-silhouette { width: 440px; height: 440px; right: -10px; top: 30px; opacity: 0.55; }
+.pj-state[data-orient='port'] .pj-copy { display: contents; --fit-w: 484px; }
+.pj-state[data-orient='port'] .pj-state-name { order: 1; font-size: 104px; }
+.pj-state[data-orient='port'] .pj-ev { order: 2; margin-top: 4px; font-size: 34px; }
+.pj-state[data-orient='port'] .pj-tag { order: 3; align-self: flex-start; margin-top: 18px; }
+.pj-state[data-orient='port'] .pj-tag-body { font-size: 34px; }
+.pj-state[data-orient='port'] .pj-portrait { order: 4; position: relative; left: auto; top: auto; flex: none; width: 220px; height: 270px; margin: 30px 0 0 10px; }
+.pj-state[data-orient='port'] .pj-first { order: 5; margin-top: 22px; font-size: 40px; }
+.pj-state[data-orient='port'] .pj-last { order: 6; margin-top: 2px; }
+.pj-state[data-orient='port'] .pj-stats { order: 7; margin-top: 24px; }
+.pj-state[data-orient='port'] .pj-stats li { padding: 0 18px; }
+.pj-state[data-orient='port'] .pj-stats b { font-size: 40px; }
+.pj-state[data-orient='port'] .pj-stats span { font-size: 17px; }
+.pj-state[data-orient='port'] .pj-tally { order: 8; position: relative; left: auto; right: auto; bottom: auto; margin-top: 30px; grid-template-columns: 1fr 1fr; gap: 16px 20px; padding: 16px 20px; }
+.pj-state[data-orient='port'] .tally-mid { grid-column: 1 / -1; grid-row: 2; margin-top: 22px; }
+.pj-state[data-orient='port'] .tally-num { font-size: 52px; }
+.pj-state[data-orient='port'] .pj-meta { left: 28px; bottom: 16px; }
+
+.pj-president[data-orient='port'] .pj-rays { left: 50%; top: 34%; }
+.pj-president[data-orient='port'] .pj-canvas { padding: 64px 28px 56px; }
+.pj-president[data-orient='port'] .pres-text { display: contents; --fit-w: 484px; }
+.pj-president[data-orient='port'] .pj-tag { order: 1; align-self: flex-start; }
+.pj-president[data-orient='port'] .pj-tag-body { font-size: 34px; }
 .pj-president[data-orient='port'] .pres-office { display: none; }
-.pj-president[data-orient='port'] .pj-tag { position: absolute; left: 0; top: -780px; }
-.pj-president[data-orient='port'] .pj-first { margin-top: 0; font-size: 46px; }
-.pj-president[data-orient='port'] .pres-wins { font-size: 40px; margin-top: 14px; }
-.pj-president[data-orient='port'] .pj-stats { margin-top: 28px; }
-.pj-president[data-orient='port'] .pj-stats li { padding: 0 20px; }
-.pj-president[data-orient='port'] .pj-stats b { font-size: 38px; }
-.pj-president[data-orient='port'] .pj-controls { top: auto; right: 24px; bottom: 24px; }
-.pj-president[data-orient='port'] .pj-rays { left: 50%; top: 30%; }
+.pj-president[data-orient='port'] .pres-scene { order: 2; position: relative; left: auto; top: auto; flex: none; align-self: center; width: 640px; height: 620px; margin: 16px 0 -140px; transform: scale(0.76); transform-origin: top center; }
+.pj-president[data-orient='port'] .pj-first { order: 3; margin-top: 6px; font-size: 44px; }
+.pj-president[data-orient='port'] .pj-last { order: 4; }
+.pj-president[data-orient='port'] .pres-wins { order: 5; margin-top: 12px; font-size: 40px; }
+.pj-president[data-orient='port'] .pj-stats { order: 6; margin-top: 22px; }
+.pj-president[data-orient='port'] .pj-stats { width: auto; }
+.pj-president[data-orient='port'] .pj-stats li { padding: 0 12px; }
+.pj-president[data-orient='port'] .pj-stats li:first-child { padding-left: 0; }
+.pj-president[data-orient='port'] .pj-stats b { font-size: 36px; }
+.pj-president[data-orient='port'] .pj-stats span { font-size: 14px; }
+.pj-president[data-orient='port'] .pres-pending { order: 7; margin-top: 16px; font-size: 17px; }
 
-/* =====================================================================
-   KEYFRAMES
-   ===================================================================== */
+@keyframes pj-shock { 0% { opacity: 0.9; transform: scale(0.96); } 100% { opacity: 0; transform: scale(1.45); } }
+@keyframes pj-pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 210, 31, 0.65); } 100% { box-shadow: 0 0 0 14px rgba(255, 210, 31, 0); } }
+@keyframes pj-tick-pop { 0% { transform: translateX(-50%) scale(1); } 35% { transform: translateX(-50%) scale(1.7); } 100% { transform: translateX(-50%) scale(1.3); } }
+@keyframes pj-map-in { from { opacity: 0; transform: rotateX(90deg) scale(0.5); } to { opacity: 1; transform: rotateX(56deg) scale(1); } }
+@keyframes pj-lit { 0% { fill: #fff; } 100% { fill: var(--c); } }
+@keyframes pj-pcard-in {
+  from { opacity: 0; transform: translate3d(120px, 40px, -260px) rotateY(-70deg) rotateX(8deg); }
+  to { opacity: 1; transform: rotateY(-16deg) rotateX(2deg); }
+}
+@keyframes pj-sway { from { transform: rotateY(-16deg) rotateX(2deg); } to { transform: rotateY(-5deg) rotateX(3deg); } }
+@keyframes pj-beam { from { opacity: 0; transform: scaleY(0); } to { opacity: 0.7; transform: scaleY(1); } }
 @keyframes pj-glow-in { from { opacity: 0; transform: scale(1.4); } to { opacity: 1; transform: scale(1.15); } }
 @keyframes pj-beams { from { transform: translateX(-12%); } to { transform: translateX(6%); } }
 @keyframes pj-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
@@ -580,8 +656,6 @@
   85% { opacity: 1; transform: skewX(-10deg) scale(1); }
   100% { opacity: 0; transform: skewX(-10deg) translateY(-14px) scale(1); }
 }
-@keyframes pj-seat { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
-@keyframes pj-seat-glint { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.7); } }
 @keyframes pj-portrait { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } to { opacity: 1; transform: none; } }
 @keyframes pj-rays-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pj-spin { to { transform: rotate(360deg); } }
@@ -590,5 +664,9 @@
   .pj,
   .pj * { animation-duration: 0.001ms !important; animation-delay: 0ms !important; transition-duration: 0.001ms !important; }
   .pj-rays,
-  .pres-ring { animation: none !important; opacity: 1 !important; }
+  .pres-pending i { animation: none !important; }
+  .pres-card { animation: none !important; opacity: 1 !important; transform: rotateY(-16deg) rotateX(2deg) !important; }
+  .pres-map { animation: none !important; opacity: 1 !important; }
+  .pres-bar { animation: none !important; opacity: 1 !important; }
+  .pres-beam { animation: none !important; opacity: 0.7 !important; }
 }

@@ -134,35 +134,18 @@ function render(result) {
   const won = checkWinner(summary, WIN_NUMBER, { live });
   const items = stateItems(fresh, summary);
   if (won) {
-    items.push(presidentItem(won, summary, states));
+    items.push(presidentItem(won, summary, states, WIN_NUMBER));
   }
   enqueue(items);
 }
 
-function previewProjection(kind = 'state', abbr = '') {
-  if (!latestSummary) {
-    return 'Results have not loaded yet';
+function replayPresident() {
+  const banner = byId('winner-banner');
+  if (!latestSummary || !banner.classList.contains('show')) {
+    return;
   }
-  if (kind === 'president') {
-    const banner = byId('winner-banner');
-    const side = banner.classList.contains('show')
-      ? banner.dataset.side
-      : latestSummary.demEV >= latestSummary.gopEV ? 'dem' : 'gop';
-    enqueue([presidentItem({ side }, latestSummary, states)]);
-    return 'Playing the presidency graphic';
-  }
-  const pool = states.filter(state => state.leader !== 'Tossup' && state.total > 0);
-  const picks = abbr
-    ? abbr.split(',').map(code => pool.find(state => state.abbr === code.trim().toUpperCase())).filter(Boolean)
-    : [pool.find(state => state.called) || pool[0]].filter(Boolean);
-  if (!picks.length) {
-    return 'No state with votes matched';
-  }
-  enqueue(stateItems(picks, latestSummary));
-  return `Playing ${picks.length} state graphic${picks.length === 1 ? '' : 's'}`;
+  enqueue([presidentItem({ side: banner.dataset.side }, latestSummary, states, WIN_NUMBER)]);
 }
-
-window.electionPreview = previewProjection;
 
 async function refresh() {
   if (busy) {
@@ -269,7 +252,7 @@ function bindControls() {
   });
   byId('btn-refresh').addEventListener('click', refresh);
   byId('btn-sidebar').addEventListener('click', toggleSidebar);
-  byId('winner-banner').addEventListener('click', () => previewProjection('president'));
+  byId('winner-banner').addEventListener('click', replayPresident);
   byId('zoom-in').addEventListener('click', () => map.zoomBy(1.6));
   byId('zoom-out').addEventListener('click', () => map.zoomBy(1 / 1.6));
 

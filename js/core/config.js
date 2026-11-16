@@ -16,7 +16,7 @@ export const PROJECTION = {
   stateMs: 7600,
   fastMs: 4200,
   fastAfter: 3,
-  presidentAutoCloseMs: 0
+  presidentMs: 16000
 };
 
 export const EXCLUDED_REGIONS = [

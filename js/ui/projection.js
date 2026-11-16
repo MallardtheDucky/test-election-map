@@ -67,19 +67,29 @@ export function stateItems(calls, summary) {
   });
 }
 
-export function presidentItem(info, summary, states) {
+export function presidentItem(info, summary, states, winNumber = 270) {
   const key = info.side;
   const leader = key.toUpperCase();
   const candidate = candidateOf(summary, leader);
+  const evs = evOf(summary);
+  const oppKey = key === 'dem' ? 'gop' : key === 'gop' ? 'dem' : evs.dem >= evs.gop ? 'dem' : 'gop';
   const pv = { gop: summary.gopPV, dem: summary.demPV, ind: summary.indPV }[key];
   const accent = { gop: '#e5424f', dem: '#4d93e6', ind: '#a98be0' }[key];
+  const pending = states.filter(state => !state.called);
+  const totalEV = states.reduce((sum, state) => sum + state.electoralVotes, 0);
   return {
     kind: 'president',
     leader,
     candidate,
-    ev: { ...evOf(summary), winner: evOf(summary)[key] },
+    oppKey,
+    winNumber,
+    totalEV: totalEV > 0 ? totalEV : 538,
+    ev: { ...evs, winner: evs[key], opp: evs[oppKey] },
     names: names(summary),
     statesWon: states.filter(state => state.called && state.leader === leader).length,
+    geometry,
+    mapStates: states.map(state => ({ name: state.name, leader: state.called ? state.leader : null, ev: state.electoralVotes })),
+    pending: { states: pending.length, ev: pending.reduce((sum, state) => sum + state.electoralVotes, 0) },
     pvShare: summary.totalPV > 0 ? pv / summary.totalPV : 0,
     portrait: loadPortrait(candidate, key),
     confetti: [accent, '#f6c945', '#ffffff', '#ffe58a']
