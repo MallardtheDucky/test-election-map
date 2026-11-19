@@ -1,4 +1,4 @@
-export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxL4ws0DQr3D6GnoE4ACz6W5zfUUewzQf9ickwcAwNm3M6DTm_97hovDp5PVAPK5ArE/exec';
+export const SHEET_URL = 'https://script.google.com/macros/s/AKfycbyn6nXXymPxVLiehCIjEHvwlQ-f3x2nuMwblKAMe2kf39t8X65DDLEwJVg9DRCKJo9W/exec';
 
 export const TITLE_SUFFIX = 'Election Center';
 
