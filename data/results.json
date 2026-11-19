@@ -665,5 +665,9 @@
    "ind_candidate": "Independent",
    "called": false
   }
- ]
+ ],
+ "county_range": {
+  "start": 2008,
+  "end": 2020
+ }
 }

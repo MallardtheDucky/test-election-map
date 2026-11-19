@@ -1,4 +1,5 @@
 import { COUNTY_DATA_URL, COUNTY_GEOMETRY_URL } from './config.js';
+import { applyRange } from './baseline.js';
 
 const INLINE = window.APRP_INLINE || null;
 const CLASS_NAMES = { U: 'Urban', S: 'Suburban', R: 'Rural' };
@@ -7,6 +8,10 @@ const CLASS_ORDER = { R: 0, S: 1, U: 2 };
 let byState = new Map();
 let byFips = new Map();
 let years = [];
+let baseYears = [];
+let baseIndex = new Map();
+let saved = {};
+let rangeInfo = { start: null, end: null, usedYears: [], historyYears: [], adjusted: false };
 
 async function fetchJson(url) {
   const response = await fetch(url);
@@ -29,22 +34,77 @@ export async function loadCounties() {
     INLINE && INLINE.counties ? INLINE.counties : fetchJson(COUNTY_DATA_URL),
     INLINE && INLINE.countyGeo ? INLINE.countyGeo : fetchJson(COUNTY_GEOMETRY_URL)
   ]);
-  years = data.years;
+  baseYears = data.years;
+  baseIndex = new Map(baseYears.map((y, i) => [y, i]));
+  years = baseYears;
   byState = new Map();
   byFips = new Map();
   data.counties.forEach(county => {
+    county.base = { d: county.d, r: county.r, t: county.t };
+    delete county.d;
+    delete county.r;
+    delete county.t;
     county.className = CLASS_NAMES[county.c];
-    county.order = CLASS_ORDER[county.c] + 0.28 * Math.log10(Math.max(county.t, 50)) + 1.4 * hash01(county.f);
     if (!byState.has(county.s)) {
       byState.set(county.s, []);
     }
     byState.get(county.s).push(county);
     byFips.set(county.f, county);
   });
-  byState.forEach(list => list.sort((a, b) => a.order - b.order));
+  rebuildRaw();
+  setCountyRange(null, null);
   const features = topojson.feature(topology, topology.objects.counties).features;
   return { features, years };
 }
+
+function rebuildRaw() {
+  years = Array.from(new Set([...baseYears, ...Object.keys(saved).map(Number)])).sort((a, b) => a - b);
+  byFips.forEach(county => {
+    const d = [];
+    const r = [];
+    const t = [];
+    years.forEach(year => {
+      const at = baseIndex.get(year);
+      let row = at === undefined ? null : [county.base.d[at], county.base.r[at], county.base.t[at]];
+      const mine = saved[year] && saved[year][county.f];
+      if (mine && mine[0] + mine[1] + mine[2] > 0) {
+        row = [mine[0], mine[1], mine[0] + mine[1] + mine[2]];
+      }
+      d.push(row ? row[0] : null);
+      r.push(row ? row[1] : null);
+      t.push(row ? row[2] : null);
+    });
+    county.raw = { d, r, t };
+  });
+}
+
+export function setSavedElections(elections) {
+  saved = elections || {};
+  rebuildRaw();
+  return setCountyRange(rangeInfo.start, rangeInfo.end);
+}
+
+export const savedYears = () => Object.keys(saved).map(Number).sort((a, b) => a - b);
+
+export function setCountyRange(start, end) {
+  const all = Array.from(byFips.values());
+  const run = applyRange(all, years, start, end);
+  all.forEach(county => {
+    county.order = CLASS_ORDER[county.c] + 0.28 * Math.log10(Math.max(county.t, 50)) + 1.4 * hash01(county.f);
+  });
+  byState.forEach(list => list.sort((a, b) => a.order - b.order));
+  rangeInfo = {
+    start,
+    end,
+    usedYears: run.usedYears,
+    historyYears: run.historyYears,
+    adjusted: run.adjusted
+  };
+  return rangeInfo;
+}
+
+export const countyRangeInfo = () => rangeInfo;
+export const countyRangeKey = (start, end) => `${start || ''}-${end || ''}`;
 
 export const countyByFips = fips => byFips.get(fips);
 export const countiesOf = abbr => byState.get(abbr) || [];

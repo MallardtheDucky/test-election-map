@@ -1,5 +1,5 @@
 import { WIN_NUMBER, AUTO_REFRESH_MS } from './core/config.js';
-import { loadGeometry, loadResults } from './core/data.js';
+import { loadGeometry, loadResults, loadSavedElections, saveElection } from './core/data.js';
 import { evaluate, summarize } from './core/election.js';
 import { byId } from './core/utils.js';
 import { createMap } from './ui/map.js';
@@ -10,7 +10,7 @@ import { checkWinner } from './ui/winner.js';
 import { trackCalls } from './core/calls.js';
 import { enqueue, presidentItem, setProjectionGeometry, stateItems } from './ui/projection.js';
 import { showTooltip, hideTooltip, showPopup, hidePopup, isPopupOpen, showCountyPopup, showCountyTooltip } from './ui/popup.js';
-import { loadCounties, solveState } from './core/counties.js';
+import { loadCounties, solveState, setCountyRange, setSavedElections, countyRangeInfo, countyRangeKey } from './core/counties.js';
 import { renderSmallStates, highlightSmallState } from './ui/smallStates.js';
 import { setCandidateImages } from './ui/avatar.js';
 import { showLoader, hideLoader, showLoaderError } from './ui/loader.js';
@@ -23,7 +23,9 @@ let map = null;
 let states = [];
 let busy = false;
 let openState = null;
-let countyYears = [];
+let appliedRange = null;
+let appliedSaved = null;
+let latestResult = null;
 let solved = null;
 let countyReady = null;
 let allMode = false;
@@ -105,7 +107,97 @@ function focusState(state) {
   selectState(state, [0, 0]);
 }
 
+function syncCountyRange(result) {
+  if (!countyReady) {
+    return;
+  }
+  const { start, end } = result.countyRange || {};
+  const key = countyRangeKey(start, end);
+  if (key !== appliedRange) {
+    setCountyRange(start, end);
+    appliedRange = key;
+  }
+}
+
+function refreshCountyLayers() {
+  if (allMode) {
+    map.updateAllCounties(allResults());
+  }
+  const current = states.find(item => item.name === openState);
+  if (current) {
+    solved = solveState(current);
+    map.updateCounties(solved.results);
+  }
+}
+
+async function syncSaved(result) {
+  if (!countyReady || result.source !== 'sheet') {
+    return;
+  }
+  const stamp = result.saved && result.saved.updated ? result.saved.updated : '';
+  if (stamp === appliedSaved || (stamp === '' && appliedSaved === null)) {
+    appliedSaved = stamp;
+    return;
+  }
+  try {
+    setSavedElections(stamp ? await loadSavedElections() : {});
+    appliedSaved = stamp;
+    refreshCountyLayers();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function saveCounties() {
+  const year = latestResult && latestResult.year;
+  if (!year || !states.length) {
+    window.alert('There are no results to save yet.');
+    return;
+  }
+  const all = allResults();
+  if (!all.size) {
+    window.alert('No county results to save yet - no state has started reporting.');
+    return;
+  }
+  const info = countyRangeInfo();
+  const inRange = info.usedYears.includes(year);
+  const lines = [
+    `Save the ${year} county results (${all.size} counties)?`,
+    '',
+    `This becomes the ${year} election in the county history, replacing the real ${year} results for these counties.`
+  ];
+  if (inRange) {
+    lines.push('', `Your Settings range includes ${year}, so the map will start learning from this result right away. Set END YEAR before ${year} if the election is still running.`);
+  }
+  if (!window.confirm(lines.join('\n'))) {
+    return;
+  }
+  const key = window.prompt('Save password (the SAVE PASSWORD cell on the Settings tab):');
+  if (!key) {
+    return;
+  }
+  const counties = {};
+  all.forEach((value, fips) => {
+    counties[fips] = [value.votesDem, value.votesGop, value.votesInd];
+  });
+  const button = byId('btn-save-counties');
+  button.disabled = true;
+  try {
+    const reply = await saveElection({ year, counties, key });
+    setSavedElections(await loadSavedElections());
+    appliedSaved = reply.updated;
+    refreshCountyLayers();
+    window.alert(`Saved ${reply.counties} counties as the ${year} election.`);
+  } catch (error) {
+    window.alert(`Not saved: ${error.message}`);
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function render(result) {
+  latestResult = result;
+  syncCountyRange(result);
   setTitle(result.year);
   setSync(result);
   states = result.records.map(evaluate);
@@ -120,14 +212,7 @@ function render(result) {
   renderSidebar(states);
   renderSmallStates(states, (state, point) => selectState(state, point));
   highlightSmallState(map.selectedState());
-  if (allMode) {
-    map.updateAllCounties(allResults());
-  }
-  const current = states.find(item => item.name === openState);
-  if (current) {
-    solved = solveState(current);
-    map.updateCounties(solved.results);
-  }
+  refreshCountyLayers();
   latestSummary = summary;
 
   const { live, fresh } = trackCalls(states, result);
@@ -155,7 +240,9 @@ async function refresh() {
   const icon = document.querySelector('#btn-refresh .icon');
   icon.classList.add('spin');
   try {
-    render(await loadResults({ fallback: false }));
+    const result = await loadResults({ fallback: false });
+    await syncSaved(result);
+    render(result);
   } catch (error) {
     console.error(error);
     setSyncError();
@@ -176,7 +263,6 @@ async function start() {
     setProjectionGeometry(geo);
     if (!countyReady) {
       const counties = await loadCounties();
-      countyYears = counties.years;
       countyReady = counties.features;
     }
 
@@ -206,12 +292,13 @@ async function start() {
         },
         onCountySelect: (county, result, point) => {
           const state = states.find(item => (allMode ? item.abbr === county.s : item.name === openState));
-          showCountyPopup(county, result, state, point, countyYears);
+          showCountyPopup(county, result, state, point, countyRangeInfo());
         }
       });
       map.setCountyFeatures(countyReady);
     }
 
+    await syncSaved(results);
     render(results);
     hideLoader();
   } catch (error) {
@@ -251,6 +338,11 @@ function bindControls() {
     map.reset();
   });
   byId('btn-refresh').addEventListener('click', refresh);
+  const saveButton = byId('btn-save-counties');
+  if (new URLSearchParams(window.location.search).has('admin')) {
+    saveButton.hidden = false;
+    saveButton.addEventListener('click', saveCounties);
+  }
   byId('btn-sidebar').addEventListener('click', toggleSidebar);
   byId('winner-banner').addEventListener('click', replayPresident);
   byId('zoom-in').addEventListener('click', () => map.zoomBy(1.6));

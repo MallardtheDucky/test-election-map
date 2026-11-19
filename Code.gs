@@ -1,8 +1,13 @@
 const SHEET_NAME = 'The Election Data';
+const SETTINGS_SHEET_NAME = 'Settings';
+const SAVED_FILE_NAME = 'Election Map Saved Elections.json';
 const CACHE_SECONDS = 20;
 const STALE_SECONDS = 21600;
 
-function doGet() {
+function doGet(e) {
+  if (e && e.parameter && e.parameter.saved) {
+    return jsonOut_(readSaved_().data);
+  }
   const cache = CacheService.getScriptCache();
   let body = cache.get('results');
   if (!body) {
@@ -117,7 +122,121 @@ function buildResults_() {
     };
   });
 
-  return { year: year || null, updated: lastChanged_(states), states: states };
+  return {
+    year: year || null,
+    updated: lastChanged_(states),
+    county_range: readCountyRange_(book),
+    saved_elections: savedInfo_(),
+    states: states
+  };
+}
+
+function readSetting_(book, label) {
+  const sheet = book.getSheetByName(SETTINGS_SHEET_NAME);
+  if (!sheet) return '';
+  const values = sheet.getRange(1, 1, Math.min(sheet.getLastRow() || 1, 40), Math.min(sheet.getLastColumn() || 1, 6)).getValues();
+  for (let r = 0; r < values.length; r++) {
+    for (let c = 0; c < values[r].length - 1; c++) {
+      if (String(values[r][c]).trim().toUpperCase() === label) return values[r][c + 1];
+    }
+  }
+  return '';
+}
+
+function readCountyRange_(book) {
+  try {
+    let start = Math.round(Number(readSetting_(book, 'START YEAR')));
+    let end = Math.round(Number(readSetting_(book, 'END YEAR')));
+    if (!isFinite(start) || !isFinite(end) || start < 1 || end < 1) return null;
+    if (start > end) { const swap = start; start = end; end = swap; }
+    return { start: start, end: end };
+  } catch (error) {
+    return null;
+  }
+}
+
+
+function jsonOut_(object) {
+  return ContentService.createTextOutput(JSON.stringify(object)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function readSaved_() {
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty('savedFileId');
+  let file = null;
+  if (id) {
+    try { file = DriveApp.getFileById(id); } catch (error) { file = null; }
+  }
+  if (!file) {
+    const found = DriveApp.getFilesByName(SAVED_FILE_NAME);
+    file = found.hasNext() ? found.next() : DriveApp.createFile(SAVED_FILE_NAME, JSON.stringify({ elections: {} }), MimeType.PLAIN_TEXT);
+    props.setProperty('savedFileId', file.getId());
+  }
+  let data;
+  try { data = JSON.parse(file.getBlob().getDataAsString()); } catch (error) { data = null; }
+  if (!data || typeof data.elections !== 'object') data = { elections: {} };
+  return { file: file, data: data };
+}
+
+function savedInfo_() {
+  const props = PropertiesService.getScriptProperties();
+  const updated = props.getProperty('savedUpdated');
+  if (!updated) return null;
+  return { years: JSON.parse(props.getProperty('savedYears') || '[]'), updated: updated };
+}
+
+function writeSaved_(file, data) {
+  file.setContent(JSON.stringify(data));
+  const props = PropertiesService.getScriptProperties();
+  const years = Object.keys(data.elections).map(Number).sort(function (a, b) { return a - b; });
+  props.setProperty('savedYears', JSON.stringify(years));
+  if (years.length) props.setProperty('savedUpdated', new Date().toISOString());
+  else props.deleteProperty('savedUpdated');
+  CacheService.getScriptCache().remove('results');
+}
+
+function doPost(e) {
+  let out;
+  try {
+    const request = JSON.parse(e.postData.contents);
+    const password = String(readSetting_(SpreadsheetApp.getActiveSpreadsheet(), 'SAVE PASSWORD')).trim();
+    if (!password) throw new Error('Saving is switched off. Type a SAVE PASSWORD on the Settings tab first.');
+    if (String(request.key).trim() !== password) throw new Error('Wrong save password.');
+
+    const year = Math.round(Number(request.year));
+    if (!isFinite(year) || year < 1788 || year > 2200) throw new Error('Bad election year.');
+
+    const cleaned = {};
+    let count = 0;
+    Object.keys(request.counties || {}).forEach(function (fips) {
+      const v = request.counties[fips];
+      if (!/^\d{5}$/.test(fips) || !Array.isArray(v) || v.length !== 3) return;
+      const row = v.map(function (n) { n = Math.round(Number(n)); return isFinite(n) && n > 0 ? n : 0; });
+      if (row[0] + row[1] + row[2] <= 0) return;
+      cleaned[fips] = row;
+      count++;
+    });
+    if (!count) throw new Error('No county results were sent.');
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(20000);
+    try {
+      const saved = readSaved_();
+      saved.data.elections[year] = { saved: new Date().toISOString(), counties: cleaned };
+      writeSaved_(saved.file, saved.data);
+    } finally {
+      lock.releaseLock();
+    }
+    out = { ok: true, year: year, counties: count, updated: savedInfo_().updated };
+  } catch (error) {
+    out = { ok: false, error: String(error && error.message ? error.message : error) };
+  }
+  return jsonOut_(out);
+}
+
+function clearSavedElections() {
+  const saved = readSaved_();
+  writeSaved_(saved.file, { elections: {} });
 }
 
 function titleCase_(text) {

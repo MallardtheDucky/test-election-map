@@ -57,6 +57,13 @@ function toRecord(raw) {
   };
 }
 
+function readRange(fromSheet) {
+  const fromAddress = (new URLSearchParams(window.location.search).get('range') || '').match(/^(\d{4})\s*[-_.]\s*(\d{4})$/);
+  const start = fromAddress ? Number(fromAddress[1]) : Number(fromSheet && fromSheet.start);
+  const end = fromAddress ? Number(fromAddress[2]) : Number(fromSheet && fromSheet.end);
+  return Number.isFinite(start) && Number.isFinite(end) && start > 0 && end > 0 ? { start, end } : { start: null, end: null };
+}
+
 function parseResults(payload) {
   if (payload && payload.error) {
     throw new Error(payload.error);
@@ -75,10 +82,13 @@ function parseResults(payload) {
   if (!records.length) {
     throw new Error('Results contain no states');
   }
+  const range = payload && payload.county_range ? payload.county_range : null;
   return {
     records,
     year: payload && payload.year ? payload.year : null,
-    updated: payload && payload.updated ? payload.updated : null
+    updated: payload && payload.updated ? payload.updated : null,
+    countyRange: readRange(range),
+    saved: payload && payload.saved_elections ? payload.saved_elections : null
   };
 }
 
@@ -122,4 +132,44 @@ export async function loadGeometry() {
       geometry: feature.geometry
     }));
   return { type: 'FeatureCollection', features };
+}
+
+export async function loadSavedElections() {
+  const live = sheetUrl();
+  if (!live) {
+    return {};
+  }
+  const joiner = live.includes('?') ? '&' : '?';
+  const payload = await fetchJson(`${live}${joiner}saved=1&t=${Date.now()}`);
+  if (payload && payload.error) {
+    throw new Error(payload.error);
+  }
+  const out = {};
+  Object.keys((payload && payload.elections) || {}).forEach(year => {
+    out[year] = payload.elections[year].counties || {};
+  });
+  return out;
+}
+
+export async function saveElection({ year, counties, key }) {
+  const live = sheetUrl();
+  if (!live) {
+    throw new Error('Saving needs the Google Sheet connection (no sheet address is set).');
+  }
+  const response = await fetch(live, {
+    method: 'POST',
+    redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ year, counties, key })
+  });
+  let reply;
+  try {
+    reply = await response.json();
+  } catch (error) {
+    throw new Error('The sheet did not answer (is the latest Code.gs deployed as a new version?)');
+  }
+  if (!reply.ok) {
+    throw new Error(reply.error || 'Save failed');
+  }
+  return reply;
 }

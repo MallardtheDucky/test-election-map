@@ -207,7 +207,10 @@ export function isPopupOpen() {
   return popup.classList.contains('show');
 }
 
-export function showCountyPopup(county, result, state, point, years) {
+export function showCountyPopup(county, result, state, point, range) {
+  const years = range.historyYears;
+  const used = range.usedYears;
+  const span = used.length ? (used.length === 1 ? `${used[0]}` : `${used[0]}–${used[used.length - 1]}`) : '';
   hideTooltip();
   const side = result ? result.leader.toLowerCase() : 'none';
   const header = el('div', `popup-header ${side}`);
@@ -218,7 +221,7 @@ export function showCountyPopup(county, result, state, point, years) {
   close.textContent = '×';
   close.addEventListener('click', hidePopup);
   header.appendChild(close);
-  header.appendChild(el('div', 'popup-meta', `${county.className} · ${county.l} history · swing factor ${county.k.toFixed(2)}`));
+  header.appendChild(el('div', 'popup-meta', `${county.className} · ${county.l} history (${span}) · swing factor ${county.k.toFixed(2)}`));
   if (!result) {
     header.appendChild(el('div', 'popup-status-pill none', 'Not yet reporting'));
   }

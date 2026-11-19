@@ -569,7 +569,6 @@
 .b-mark em { position: absolute; top: -30px; left: 50%; transform: translateX(-50%); font-style: normal; font-size: 24px; font-weight: 800; color: var(--yellow); }
 .pj-president.is-declared .b-mark em { animation: pj-tick-pop 1s var(--punch) both; }
 
-
 .pj[data-orient='port'] .pj-canvas {
   display: flex;
   flex-direction: column;
