@@ -1,36 +1,90 @@
 const SHEET_NAME = 'The Election Data';
 const SETTINGS_SHEET_NAME = 'Settings';
 const SAVED_FILE_NAME = 'Election Map Saved Elections.json';
-const CACHE_SECONDS = 20;
+const CACHE_SECONDS = 10;
 const STALE_SECONDS = 21600;
+const IMAGE_CACHE_SECONDS = 600;
 
 function doGet(e) {
   if (e && e.parameter && e.parameter.saved) {
     return jsonOut_(readSaved_().data);
   }
   const cache = CacheService.getScriptCache();
-  let body = cache.get('results');
-  if (!body) {
-    const lock = LockService.getScriptLock();
-    const locked = lock.tryLock(5000);
-    try {
-      body = cache.get('results');
-      if (!body) {
-        try {
-          body = JSON.stringify(buildResults_());
-          cache.put('results', body, CACHE_SECONDS);
-          cache.put('lastGood', body, STALE_SECONDS);
-        } catch (error) {
+  const fresh = cache.get('results');
+  if (fresh) return textOut_(fresh);
 
-          body = cache.get('lastGood') ||
-            JSON.stringify({ error: String(error && error.message ? error.message : error), states: [] });
-        }
-      }
-    } finally {
-      if (locked) lock.releaseLock();
-    }
+  const stale = cache.get('lastGood');
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(4000)) {
+    return textOut_(stale || errorBody_('The sheet is busy, try again in a moment.'));
   }
+  try {
+    const again = cache.get('results');
+    if (again) return textOut_(again);
+    const built = rebuild_(false);
+    return textOut_(built.body || stale || errorBody_(built.error));
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function rebuild_(refreshImages) {
+  const cache = CacheService.getScriptCache();
+  try {
+    if (refreshImages) cache.remove('imgs');
+    const body = JSON.stringify(buildResults_());
+    cachePut_(cache, 'results', body, CACHE_SECONDS);
+    cachePut_(cache, 'lastGood', body, STALE_SECONDS);
+    return { body: body, error: '' };
+  } catch (error) {
+    return { body: '', error: String(error && error.message ? error.message : error) };
+  }
+}
+
+function cachePut_(cache, key, value, seconds) {
+  try {
+    cache.put(key, value, seconds);
+  } catch (error) {
+    cache.remove(key);
+  }
+}
+
+function textOut_(body) {
   return ContentService.createTextOutput(body).setMimeType(ContentService.MimeType.JSON);
+}
+
+function errorBody_(message) {
+  return JSON.stringify({ error: message || 'Results are not available yet', states: [] });
+}
+
+function refreshResults() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(25000)) return;
+  try {
+    rebuild_(false);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function onSheetChange() {
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(25000)) return;
+  try {
+    rebuild_(true);
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function installTriggers() {
+  ScriptApp.getProjectTriggers().forEach(function (trigger) {
+    const name = trigger.getHandlerFunction();
+    if (name === 'refreshResults' || name === 'onSheetChange') ScriptApp.deleteTrigger(trigger);
+  });
+  ScriptApp.newTrigger('refreshResults').timeBased().everyMinutes(1).create();
+  ScriptApp.newTrigger('onSheetChange').forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet()).onChange().create();
+  onSheetChange();
 }
 
 function buildResults_() {
@@ -58,9 +112,9 @@ function buildResults_() {
     winner: need('WINNER'),
     candC: header.indexOf('CANDIDATE C'),
     ind: header.indexOf('IND VOTES'),
-    imgA: header.indexOf('IMAGE A'),
-    imgB: header.indexOf('IMAGE B'),
-    imgC: header.indexOf('IMAGE C')
+    imgA: firstHeader_(header, ['REPUBLICAN IMAGE', 'IMAGE A']),
+    imgB: firstHeader_(header, ['DEMOCRAT IMAGE', 'IMAGE B']),
+    imgC: firstHeader_(header, ['INDEPENDENT IMAGE', 'IMAGE C'])
   };
 
   const num = function (v) { const n = Number(v); return isFinite(n) ? n : 0; };
@@ -85,11 +139,7 @@ function buildResults_() {
   if (year) rows = rows.filter(function (r) { return num(r[col.year]) === year; });
   if (!rows.length) throw new Error('No state rows found');
 
-  const images = {
-    gop: findImage_(sheet, rowNumbers, col.imgA, 'a'),
-    dem: findImage_(sheet, rowNumbers, col.imgB, 'b'),
-    ind: findImage_(sheet, rowNumbers, col.imgC, 'c')
-  };
+  const images = readImages_(sheet, values, rowNumbers, [col.imgA, col.imgB, col.imgC]);
 
   const states = rows.map(function (r) {
     const gop = Math.round(num(r[col.gop]));
@@ -256,14 +306,54 @@ function lastChanged_(states) {
   return props.getProperty('changedAt');
 }
 
-function findImage_(sheet, rowNumbers, colIndex, key) {
+function firstHeader_(header, names) {
+  for (let i = 0; i < names.length; i++) {
+    const index = header.indexOf(names[i]);
+    if (index !== -1) return index;
+  }
+  return -1;
+}
+
+function readImages_(sheet, values, rowNumbers, columns) {
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get('imgs');
+  if (cached) {
+    try { return JSON.parse(cached); } catch (error) {}
+  }
+  const floating = floatingImages_(sheet);
+  const keys = ['gop', 'dem', 'ind'];
+  const letters = ['a', 'b', 'c'];
+  const out = {};
+  keys.forEach(function (key, k) {
+    out[key] = findImage_(sheet, values, rowNumbers, columns[k], letters[k], floating);
+  });
+  cachePut_(cache, 'imgs', JSON.stringify(out), IMAGE_CACHE_SECONDS);
+  return out;
+}
+
+function floatingImages_(sheet) {
+  const map = {};
+  try {
+    sheet.getImages().forEach(function (image) {
+      const column = image.getAnchorCell().getColumn();
+      if (!map[column]) {
+        const url = image.getUrl();
+        if (url) map[column] = url;
+      }
+    });
+  } catch (error) {}
+  return map;
+}
+
+function findImage_(sheet, values, rowNumbers, colIndex, key, floating) {
   if (colIndex === -1) return '';
+  if (floating[colIndex + 1]) return floating[colIndex + 1];
   for (let k = 0; k < rowNumbers.length; k++) {
-    const cell = sheet.getRange(rowNumbers[k], colIndex + 1);
-    const value = cell.getValue();
-    if (value === '' || value === null) continue;
+    const value = values[rowNumbers[k] - 1][colIndex];
+    if (value === '' || value === null || value === undefined) continue;
     try {
-      return toImageUrl_(value, cell.getFormula(), key);
+      const formula = sheet.getRange(rowNumbers[k], colIndex + 1).getFormula();
+      return toImageUrl_(value, formula, key);
     } catch (error) {
       return '';
     }
@@ -303,7 +393,7 @@ function hostImage_(contentUrl, key) {
     file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
   }
   const url = 'https://lh3.googleusercontent.com/d/' + file.getId() + '=w600';
-  cache.put('img:' + key, url, 300);
+  cachePut_(cache, 'img:' + key, url, 21600);
   return url;
 }
 

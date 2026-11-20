@@ -10,7 +10,7 @@ export const COUNTY_GEOMETRY_URL = 'data/geo/counties.topojson';
 export const COUNTY_DATA_URL = 'data/counties.json';
 export const LOCAL_RESULTS_URL = 'data/results.json';
 
-export const AUTO_REFRESH_MS = 30000;
+export const AUTO_REFRESH_MS = 15000;
 
 export const PROJECTION = {
   stateMs: 7600,

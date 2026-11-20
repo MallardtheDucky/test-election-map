@@ -1,5 +1,5 @@
 import { TOTAL_EV, TITLE_SUFFIX } from '../core/config.js';
-import { byId, formatNumber, formatReporting, shortName } from '../core/utils.js';
+import { byId, formatNumber, formatReporting } from '../core/utils.js';
 import { mountCutout } from './avatar.js';
 
 const refs = {
@@ -101,9 +101,9 @@ export function renderHeader(summary) {
     renderedNames = namesKey;
     mountCutout(refs.avatarGop, gopName, 'gop');
     mountCutout(refs.avatarDem, demName, 'dem');
-    refs.nameGop.textContent = shortName(gopName);
-    refs.nameDem.textContent = shortName(demName);
-    refs.nameInd.textContent = shortName(summary.indCandidate || 'Independent');
+    refs.nameGop.textContent = gopName;
+    refs.nameDem.textContent = demName;
+    refs.nameInd.textContent = summary.indCandidate || 'Independent';
   }
 
   animateValue(refs.evGop, summary.gopEV, 600);

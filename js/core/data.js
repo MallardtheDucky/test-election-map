@@ -14,7 +14,7 @@ function sheetUrl() {
 
 async function fetchJson(url) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
+  const timer = setTimeout(() => controller.abort(), 12000);
   let text;
   try {
     const response = await fetch(url, { redirect: 'follow', signal: controller.signal });
@@ -97,12 +97,19 @@ export async function loadResults({ fallback = true } = {}) {
   const live = sheetUrl();
 
   if (live) {
-    try {
-      const joiner = live.includes('?') ? '&' : '?';
-      const payload = await fetchJson(`${live}${joiner}t=${Date.now()}`);
-      return { ...parseResults(payload), source: 'sheet' };
-    } catch (error) {
-      failures.push(`Google Sheet: ${error.message}`);
+    const joiner = live.includes('?') ? '&' : '?';
+    const attempts = fallback ? 2 : 3;
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+      try {
+        const payload = await fetchJson(`${live}${joiner}t=${Date.now()}`);
+        return { ...parseResults(payload), source: 'sheet' };
+      } catch (error) {
+        if (attempt === attempts) {
+          failures.push(`Google Sheet: ${error.message}`);
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 800 * attempt));
+        }
+      }
     }
   }
 

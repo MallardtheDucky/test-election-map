@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/loader.css">
   <link rel="stylesheet" href="css/header.css">
+  <link rel="stylesheet" href="css/scoreboard.css">
   <link rel="stylesheet" href="css/map.css">
   <link rel="stylesheet" href="css/sidebar.css">
   <link rel="stylesheet" href="css/legend.css">
@@ -75,6 +76,8 @@
           <div class="live-badge"><span class="live-dot"></span>Live</div>
           <h1 class="title" id="title"></h1>
           <div class="sync" id="sync" data-state="local"><span class="sync-dot"></span><span id="sync-text">Loading</span></div>
+          <span class="reporting" id="reporting">0% of votes counted</span>
+          <span class="stat-ind" id="ind-wrap" hidden><span id="name-ind">Independent</span> <span id="pv-ind">0 (0%)</span></span>
         </div>
 
         <div class="header-controls">
@@ -94,41 +97,39 @@
       </div>
 
       <div class="scoreboard">
-        <div class="cand cand-dem">
-          <div class="candidate-slot" id="avatar-dem"></div>
-          <div class="cand-body">
-            <span class="cand-name" id="name-dem"></span>
-            <div class="cand-row">
-              <strong class="cand-ev" id="ev-dem">0</strong>
-              <span class="cand-stats"><span>electoral college votes</span><span id="pv-dem">0 votes</span></span>
+        <div class="candidate-slot" id="avatar-dem"></div>
+
+        <div class="score-main">
+          <div class="score-top">
+            <div class="cand cand-dem">
+              <span class="cand-name" id="name-dem"></span>
+              <div class="cand-row">
+                <strong class="cand-ev" id="ev-dem">0</strong>
+                <span class="cand-stats"><span class="cand-label">electoral college votes</span><span class="cand-votes" id="pv-dem">0 votes</span></span>
+              </div>
+            </div>
+
+            <div class="cand cand-gop">
+              <span class="cand-name" id="name-gop"></span>
+              <div class="cand-row">
+                <span class="cand-stats"><span class="cand-label">electoral college votes</span><span class="cand-votes" id="pv-gop">0 votes</span></span>
+                <strong class="cand-ev" id="ev-gop">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="meter">
+            <div class="meter-goal">270 to win</div>
+            <div class="progress-bar-wrapper">
+              <div class="progress-bar dem" id="bar-dem"></div>
+              <div class="progress-bar ind" id="bar-ind"></div>
+              <div class="progress-bar gop" id="bar-gop"></div>
+              <div class="threshold-marker"></div>
             </div>
           </div>
         </div>
 
-        <div class="meter">
-          <div class="meter-goal">270 to win</div>
-          <div class="progress-bar-wrapper">
-            <div class="progress-bar dem" id="bar-dem"></div>
-            <div class="progress-bar ind" id="bar-ind"></div>
-            <div class="progress-bar gop" id="bar-gop"></div>
-            <div class="threshold-marker"></div>
-          </div>
-          <div class="meter-foot">
-            <span id="reporting">0% of votes counted</span>
-            <span class="stat-ind" id="ind-wrap" hidden><span id="name-ind">Independent</span> <span id="pv-ind">0 (0%)</span></span>
-          </div>
-        </div>
-
-        <div class="cand cand-gop">
-          <div class="cand-body">
-            <span class="cand-name" id="name-gop"></span>
-            <div class="cand-row">
-              <span class="cand-stats"><span>electoral college votes</span><span id="pv-gop">0 votes</span></span>
-              <strong class="cand-ev" id="ev-gop">0</strong>
-            </div>
-          </div>
-          <div class="candidate-slot" id="avatar-gop"></div>
-        </div>
+        <div class="candidate-slot" id="avatar-gop"></div>
       </div>
     </header>
 

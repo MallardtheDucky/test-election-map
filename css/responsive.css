@@ -1,69 +1,35 @@
-@media (max-width: 820px) {
-  .scoreboard {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 14px;
-  }
 
-  .meter {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-
-  .cand-ev {
-    font-size: 34px;
-  }
-
-  .cand-name {
-    font-size: 21px;
-  }
-}
 
 @media (max-width: 600px) {
-  .label {
+.label {
     font-size: 10px;
   }
-
-  .label-ev {
+.label-ev {
     font-size: 9px;
   }
-
-  .title {
+.title {
     font-size: 21px;
   }
-
-  .sync {
+.sync {
     display: none;
   }
-
-  #header {
+#header {
     padding: 8px 16px 10px;
   }
-
-  .avatar {
+.avatar {
     width: 44px;
     height: 44px;
     font-size: 16px;
   }
-
-  .cand {
-    gap: 8px;
-  }
-
-  .cand-stats {
-    display: none;
-  }
-
-  .legend-row {
+.legend-row {
     gap: 4px 10px;
     font-size: 11px;
   }
-
-  #sidebar {
+#sidebar {
     width: 100%;
     right: -100%;
   }
-
-  #small-states {
+#small-states {
     top: auto;
     right: 8px;
     bottom: 64px;
@@ -72,13 +38,10 @@
     gap: 4px;
     padding: 8px;
   }
-
-  .small-tile {
+.small-tile {
     height: 36px;
   }
-
-  body.sidebar-open .zoom-controls,
-  body.sidebar-open #small-states {
+body.sidebar-open .zoom-controls, body.sidebar-open #small-states {
     right: 8px;
   }
 

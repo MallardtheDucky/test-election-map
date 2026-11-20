@@ -1,3 +1,4 @@
+
 :root {
   --page: #f5f6fa;
   --page-text: #141c2e;
@@ -39,31 +40,14 @@
 :root { color-scheme: light; }
 :root[data-theme='dark'] { color-scheme: dark; }
 body { transition: background 0.25s, color 0.25s; }
-
 #header {
-  padding: 12px 28px 14px;
+  padding: 8px 28px 12px;
   background: var(--page);
   border-bottom: 1px solid var(--page-line);
   box-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.35);
 }
-.title, .meter-goal { color: var(--page-text); }
-.sync, .meter-foot { color: var(--muted); }
-.cand-dem .cand-name, .cand-dem .cand-ev, .cand-dem .cand-stats { color: var(--dem-text); }
-.cand-gop .cand-name, .cand-gop .cand-ev, .cand-gop .cand-stats { color: var(--gop-text); }
-.scoreboard { gap: 30px; align-items: end; }
-.cand { align-items: flex-end; }
-.progress-bar-wrapper {
-  height: 16px;
-  background: var(--bar-track);
-  border-radius: 999px;
-  overflow: visible;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
-}
-.progress-bar.dem { background: linear-gradient(90deg, #17448f, #3f82d9); border-radius: 999px 0 0 999px; }
-.progress-bar.gop { background: linear-gradient(270deg, #a8101f, #e5424f); border-radius: 0 999px 999px 0; }
-.threshold-marker { background: var(--page-text); width: 2px; top: -6px; height: calc(100% + 12px); border-radius: 2px; }
-.meter { padding-bottom: 6px; }
-
+.title { color: var(--page-text); }
+.sync { color: var(--muted); }
 .btn-icon {
   background: var(--surface);
   color: var(--page-text);
@@ -76,21 +60,6 @@ body { transition: background 0.25s, color 0.25s; }
 #btn-theme .icon-moon { display: none; }
 :root[data-theme='dark'] #btn-theme .icon-sun { display: none; }
 :root[data-theme='dark'] #btn-theme .icon-moon { display: block; }
-
-.candidate-slot { display: flex; align-items: flex-end; }
-.cutout {
-  display: block;
-  height: 104px;
-  width: auto;
-  max-width: 130px;
-  object-fit: contain;
-  filter: grayscale(1) contrast(1.08) drop-shadow(0 10px 8px var(--cut-shadow)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.45));
-  transition: transform 0.25s;
-}
-.cand:hover .cutout { transform: translateY(-3px); }
-.candidate-slot .avatar { width: 84px; height: 84px; }
-.candidate-slot .avatar img { filter: grayscale(1); }
-
 #map { background: var(--map-bg); }
 .state { stroke: var(--state-stroke); stroke-width: 1px; }
 .state:hover, .county:hover { stroke: var(--hover-stroke); }
@@ -98,15 +67,12 @@ body { transition: background 0.25s, color 0.25s; }
 .county { stroke: var(--state-stroke); }
 .states { filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.12)); }
 :root[data-theme='dark'] .states { filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5)); }
-
 .county-all { stroke: var(--county-line); stroke-width: 0.5px; stroke-linejoin: round; vector-effect: non-scaling-stroke; cursor: pointer; }
 .county-all:hover { stroke: var(--hover-stroke) !important; stroke-width: 1.4px; filter: brightness(1.15); }
 body.all-counties .states, body.all-counties .labels { display: none; }
-
 .zoom-controls { background: var(--surface); border-color: var(--page-line); border-radius: 12px; box-shadow: var(--card-shadow); }
 .zoom-controls .btn-icon { background: transparent; border-radius: 0; }
 .zoom-controls .btn-icon + .btn-icon { border-top: 1px solid var(--page-line); }
-
 #toolbar {
   position: absolute;
   top: 14px;
@@ -138,7 +104,6 @@ body.all-counties .states, body.all-counties .labels { display: none; }
 .chip .icon { width: 16px; height: 16px; }
 .chip:hover { background: var(--surface-2); }
 .chip[aria-pressed='true'] { background: var(--accent); color: var(--accent-text); }
-
 #legend-panel {
   display: none;
   left: 14px;
@@ -160,7 +125,6 @@ body.show-legend #legend-panel { display: flex; animation: pop 0.18s ease-out; }
 .legend-ramp > span:first-child { min-width: 40px; }
 .legend-note { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
 .legend-dot { border-radius: 4px; }
-
 #small-states, body.sidebar-open #small-states {
   display: none;
   top: auto;
@@ -179,66 +143,46 @@ body.show-small #small-states { display: grid; animation: pop 0.18s ease-out; }
 .small-tile:hover, .small-tile.selected { border-color: var(--hover-stroke); }
 
 @keyframes pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-
 #sidebar:not(.open) { box-shadow: none; }
 html, body, #app { height: 100vh; height: 100dvh; }
 #header { padding-top: max(12px, env(safe-area-inset-top)); padding-left: max(28px, env(safe-area-inset-left)); padding-right: max(28px, env(safe-area-inset-right)); }
 
 @media (max-width: 820px) {
-  #header { padding-left: 16px; padding-right: 16px; }
-  .scoreboard { align-items: end; }
-  .cutout { height: 78px; }
+#header { padding-left: 16px; padding-right: 16px; }
 }
 @media (max-width: 600px) {
-  #header { padding: max(8px, env(safe-area-inset-top)) 12px 10px; }
-  .top-row { margin-bottom: 6px; gap: 8px; }
-  .title-group { flex-wrap: nowrap; gap: 8px; }
-  .title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .live-badge { padding: 2px 7px; font-size: 11px; }
-  .header-controls { gap: 6px; }
-  .btn-icon { width: 38px; height: 38px; }
-  .scoreboard { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6px 10px; }
-  .cand { gap: 8px; }
-  .cand-body { overflow: hidden; }
-  .cand-name { font-size: 15px; overflow: hidden; text-overflow: ellipsis; }
-  .cand-ev { font-size: 30px; }
-  .cutout { height: 58px; max-width: 70px; }
-  .candidate-slot .avatar { width: 46px; height: 46px; }
-  .progress-bar-wrapper { height: 12px; }
-  .meter-foot { font-size: 11px; }
-
-  #toolbar { top: 10px; left: 10px; right: auto; max-width: calc(100% - 72px); padding: 4px; gap: 2px; }
-  .chip { padding: 8px 10px; font-size: 12px; }
-  .chip .icon { width: 18px; height: 18px; }
-  .zoom-controls { top: 10px; right: 10px; }
-  .zoom-controls .btn-icon { width: 40px; height: 40px; }
-
-  #legend-panel { top: 62px; left: 10px; right: 10px; max-height: calc(100% - 140px); overflow-y: auto; padding: 12px 14px; }
-  #small-states, body.sidebar-open #small-states {
+#header { padding: max(8px, env(safe-area-inset-top)) 12px 10px; }
+.top-row { margin-bottom: 6px; gap: 8px; }
+.title-group { flex-wrap: nowrap; gap: 8px; }
+.title { font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live-badge { padding: 2px 7px; font-size: 11px; }
+.header-controls { gap: 6px; }
+.btn-icon { width: 38px; height: 38px; }
+#toolbar { top: 10px; left: 10px; right: auto; max-width: calc(100% - 72px); padding: 4px; gap: 2px; }
+.chip { padding: 8px 10px; font-size: 12px; }
+.chip .icon { width: 18px; height: 18px; }
+.zoom-controls { top: 10px; right: 10px; }
+.zoom-controls .btn-icon { width: 40px; height: 40px; }
+#legend-panel { top: 62px; left: 10px; right: 10px; max-height: calc(100% - 140px); overflow-y: auto; padding: 12px 14px; }
+#small-states, body.sidebar-open #small-states {
     left: 10px; right: 10px; bottom: max(10px, env(safe-area-inset-bottom));
     grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px;
   }
-  .small-tile { height: 44px; }
-
-  #popup {
+.small-tile { height: 44px; }
+#popup {
     left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
     width: 100%; max-width: 100%; max-height: 58%; overflow-y: auto;
     border-radius: 18px 18px 0 0; padding-bottom: env(safe-area-inset-bottom);
   }
 }
 @media (max-width: 480px) {
-  .chip-label { display: none; }
-  .chip { padding: 9px 12px; }
+.chip-label { display: none; }
+.chip { padding: 9px 12px; }
 }
 @media (max-height: 500px) and (orientation: landscape) {
-  .cutout { height: 44px; }
-  .cand-ev { font-size: 26px; }
-  .cand-name { font-size: 15px; }
-  .top-row { margin-bottom: 2px; }
-  .title { font-size: 15px; }
+.top-row { margin-bottom: 2px; }
+.title { font-size: 15px; }
 }
-
 .legend-dot.hatch { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.55) 0 2px, transparent 2px 6px); }
 .small-tile.leaning { background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.45) 0 3px, transparent 3px 8px); }
-
 .chip[hidden] { display: none; }

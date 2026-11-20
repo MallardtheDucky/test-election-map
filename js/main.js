@@ -232,6 +232,8 @@ function replayPresident() {
   enqueue([presidentItem({ side: banner.dataset.side }, latestSummary, states, WIN_NUMBER)]);
 }
 
+let failedRefreshes = 0;
+
 async function refresh() {
   if (busy) {
     return;
@@ -243,9 +245,13 @@ async function refresh() {
     const result = await loadResults({ fallback: false });
     await syncSaved(result);
     render(result);
+    failedRefreshes = 0;
   } catch (error) {
     console.error(error);
-    setSyncError();
+    failedRefreshes += 1;
+    if (failedRefreshes >= 2) {
+      setSyncError();
+    }
   } finally {
     setTimeout(() => icon.classList.remove('spin'), 800);
     busy = false;
@@ -374,5 +380,14 @@ bindControls();
 start();
 
 if (AUTO_REFRESH_MS > 0) {
-  setInterval(refresh, AUTO_REFRESH_MS);
+  setInterval(() => {
+    if (!document.hidden) {
+      refresh();
+    }
+  }, AUTO_REFRESH_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+      refresh();
+    }
+  });
 }
